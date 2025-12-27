@@ -448,16 +448,18 @@ export default function PrescrizioniPage() {
       </div>
 
       {/* Patients List */}
-      {filteredPatients.length === 0 ? (
+      {currentPatients.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <ClipboardList className="w-12 h-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Nessun paziente trovato</p>
+            <p className="text-muted-foreground">
+              Nessun paziente {activeTab === "picc" ? "PICC" : "MED"} trovato
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredPatients.map((patient) => {
+          {currentPatients.map((patient) => {
             const prescrizione = prescrizioni[patient.id];
             const status = getPrescriptionStatus(prescrizione);
             
