@@ -294,7 +294,124 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
     }
   };
 
-  // Render form fields
+  // Render SIMPLIFIED form fields
+  const renderSimplifiedForm = (data, isEditMode = false) => (
+    <div className="space-y-6">
+      <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+        <p className="text-sm text-emerald-700 font-medium">Versione Semplificata</p>
+        <p className="text-xs text-emerald-600">Campi essenziali per registrazione rapida</p>
+      </div>
+      
+      {/* Basic Info */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Data Impianto *</Label>
+          <Input
+            type="date"
+            value={data.data_impianto || ""}
+            onChange={(e) => updateField("data_impianto", e.target.value, isEditMode)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Presidio di Impianto</Label>
+          <Input
+            value={data.presidio_impianto || ""}
+            onChange={(e) => updateField("presidio_impianto", e.target.value, isEditMode)}
+            placeholder="Es: Ospedale San Giovanni"
+          />
+        </div>
+      </div>
+
+      {/* Tipo Impianto */}
+      <div className="space-y-2">
+        <Label>Tipo di Impianto *</Label>
+        <Select
+          value={data.tipo_catetere || ""}
+          onValueChange={(value) => updateField("tipo_catetere", value, isEditMode)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleziona tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="picc">PICC</SelectItem>
+            <SelectItem value="picc_port">PICC Port</SelectItem>
+            <SelectItem value="midline">Midline</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Positioning */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Braccio *</Label>
+          <Select
+            value={data.braccio || ""}
+            onValueChange={(value) => updateField("braccio", value, isEditMode)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleziona" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dx">Destro</SelectItem>
+              <SelectItem value="sn">Sinistro</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Vena *</Label>
+          <Select
+            value={data.vena || ""}
+            onValueChange={(value) => updateField("vena", value, isEditMode)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleziona" />
+            </SelectTrigger>
+            <SelectContent>
+              {VENA_OPTIONS.map((opt) => (
+                <SelectItem key={opt.id} value={opt.id}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Tunnelizzazione */}
+      <div className="flex items-center space-x-3 p-3 border rounded-lg">
+        <Checkbox
+          id={`tunnelizzazione-${isEditMode ? 'edit' : 'new'}`}
+          checked={data.tunnelizzazione || false}
+          onCheckedChange={(checked) => updateField("tunnelizzazione", !!checked, isEditMode)}
+        />
+        <Label htmlFor={`tunnelizzazione-${isEditMode ? 'edit' : 'new'}`} className="font-medium">
+          Tunnelizzazione
+        </Label>
+      </div>
+
+      {/* Exit-site */}
+      <div className="space-y-2">
+        <Label>Exit-site (cm)</Label>
+        <Input
+          value={data.exit_site_cm || ""}
+          onChange={(e) => updateField("exit_site_cm", e.target.value, isEditMode)}
+          placeholder="Distanza in cm dall'inserzione"
+        />
+      </div>
+
+      {/* Operatore */}
+      <div className="space-y-2">
+        <Label>Operatore</Label>
+        <Input
+          value={data.operatore || ""}
+          onChange={(e) => updateField("operatore", e.target.value, isEditMode)}
+          placeholder="Nome operatore"
+        />
+      </div>
+    </div>
+  );
+
+  // Render form fields (COMPLETE VERSION)
   const renderFormFields = (data, isEditMode = false) => (
     <div className="space-y-6">
       {/* Basic Info */}
