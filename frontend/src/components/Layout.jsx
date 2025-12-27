@@ -27,6 +27,9 @@ import {
   Monitor,
   Smartphone,
   ClipboardList,
+  ZoomIn,
+  ZoomOut,
+  Type,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
