@@ -265,6 +265,12 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
   const handleDownloadPDF = async () => {
     if (!selectedScheda) return;
     
+    // Only allow download for complete scheda type
+    if (selectedScheda.scheda_type === "semplificata") {
+      toast.error("La scheda semplificata non è scaricabile");
+      return;
+    }
+    
     try {
       toast.info("Generazione PDF in corso...");
       const response = await apiClient.get(`/schede-impianto-picc/${selectedScheda.id}/pdf`, {
@@ -281,8 +287,7 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
       window.URL.revokeObjectURL(url);
       toast.success("PDF scaricato!");
     } catch (error) {
-      // Fallback to print
-      handlePrintScheda();
+      toast.error("Errore nel download del PDF");
     }
   };
 
