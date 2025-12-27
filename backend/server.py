@@ -1292,12 +1292,39 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
             
             story.append(Spacer(1, 15))
     
-    # Photos info
-    if photos:
+    # Allegati Section - Convert all attachments to PDF pages (photos as images in PDF)
+    # Filter out MED scheda photos as they are already included
+    general_photos = [p for p in photos if p.get('tipo') != 'MED_SCHEDA' and p.get('file_type', 'image') == 'image']
+    documents = [p for p in photos if p.get('file_type') and p.get('file_type') != 'image']
+    
+    if general_photos or documents:
         story.append(Spacer(1, 20))
-        story.append(Paragraph(f"Foto Allegate: {len(photos)}", heading_style))
-        for photo in photos:
-            story.append(Paragraph(f"- Foto del {photo.get('data', '-')} ({photo.get('tipo', '-')})", normal_style))
+        story.append(Paragraph("Allegati", heading_style))
+        
+        # Include images as full-page images in the PDF
+        if general_photos:
+            story.append(Paragraph(f"<b>Foto ({len(general_photos)}):</b>", normal_style))
+            for idx, photo in enumerate(general_photos, 1):
+                try:
+                    img_data = base64.b64decode(photo.get('image_data', ''))
+                    img_buffer = io.BytesIO(img_data)
+                    # Create image that fits the page
+                    img = RLImage(img_buffer, width=14*cm, height=10*cm)
+                    story.append(Spacer(1, 10))
+                    story.append(Paragraph(f"Foto {idx} - {photo.get('data', '-')}", normal_style))
+                    story.append(img)
+                    story.append(Spacer(1, 10))
+                except Exception as e:
+                    story.append(Paragraph(f"[Foto {idx} non disponibile]", normal_style))
+        
+        # List documents (PDFs, Word, Excel - these will be in ZIP separately)
+        if documents:
+            story.append(Paragraph(f"<b>Documenti ({len(documents)}):</b>", normal_style))
+            for doc in documents:
+                doc_name = doc.get('original_name', 'Documento')
+                doc_type = doc.get('file_type', 'file').upper()
+                story.append(Paragraph(f"- {doc_name} ({doc_type}) - {doc.get('data', '-')}", normal_style))
+            story.append(Paragraph("<i>I documenti PDF/Word/Excel sono inclusi separatamente nello ZIP.</i>", normal_style))
     
     doc.build(story)
     buffer.seek(0)
