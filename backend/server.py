@@ -906,14 +906,6 @@ def generate_scheda_impianto_pdf(scheda: dict, patient: dict) -> bytes:
     return buffer.getvalue()
 
 
-# ============== STATISTICS =============
-        story.append(Paragraph("<b>NOTE:</b>", bold_style))
-        story.append(Paragraph(scheda.get('note', ''), normal_style))
-    
-    doc.build(story)
-    buffer.seek(0)
-    return buffer.getvalue()
-
 # ============== SCHEDE GESTIONE PICC (MENSILE) ==============
 @api_router.post("/schede-gestione-picc", response_model=SchedaGestionePICC)
 async def create_scheda_gestione_picc(data: SchedaGestionePICCCreate, payload: dict = Depends(verify_token)):
