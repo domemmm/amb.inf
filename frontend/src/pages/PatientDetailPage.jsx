@@ -36,6 +36,8 @@ import {
   Trash2,
   Copy,
   Download,
+  FileDown,
+  FileArchive,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
