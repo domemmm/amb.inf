@@ -1498,15 +1498,12 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
 
 
 def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list, schede_gestione: list, photos: list) -> bytes:
-    """Generate a ZIP with all patient data - WITHOUT allegati as per user request"""
+    """Generate a ZIP with patient data - NO allegati, only PDF cartella clinica"""
     buffer = io.BytesIO()
     
-    # Filter only MED scheda photos (those stay in scheda)
-    med_scheda_photos = [p for p in photos if p.get('tipo') == 'MED_SCHEDA']
-    
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-        # Add PDF summary (contains all data, photos in MED schede only)
-        pdf_data = generate_patient_pdf(patient, schede_med, schede_impianto, schede_gestione, med_scheda_photos)
+        # Add PDF summary (NO allegati, NO foto MED)
+        pdf_data = generate_patient_pdf(patient, schede_med, schede_impianto, schede_gestione, [])
         zf.writestr(f"cartella_clinica_{patient.get('cognome', 'paziente')}_{patient.get('nome', '')}.pdf", pdf_data)
         
         # Add patient JSON data
@@ -1514,14 +1511,15 @@ def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list,
         patient_json = json.dumps(patient, indent=2, ensure_ascii=False)
         zf.writestr("dati_paziente.json", patient_json)
         
-        # Add MED schede as JSON
+        # Add MED schede as JSON (without photos)
         if schede_med:
             med_json = json.dumps(schede_med, indent=2, ensure_ascii=False)
             zf.writestr("schede_medicazione_med.json", med_json)
         
-        # Add PICC impianto schede as JSON
-        if schede_impianto:
-            impianto_json = json.dumps(schede_impianto, indent=2, ensure_ascii=False)
+        # Add only COMPLETE PICC impianto schede as JSON (no semplificata)
+        schede_complete = [s for s in schede_impianto if s.get('scheda_type') != 'semplificata']
+        if schede_complete:
+            impianto_json = json.dumps(schede_complete, indent=2, ensure_ascii=False)
             zf.writestr("schede_impianto_picc.json", impianto_json)
         
         # Add PICC gestione schede as JSON
@@ -1529,14 +1527,10 @@ def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list,
             gestione_json = json.dumps(schede_gestione, indent=2, ensure_ascii=False)
             zf.writestr("schede_gestione_picc.json", gestione_json)
         
-        # Add files by type
-        if photos:
-            for idx, photo in enumerate(photos, 1):
-                file_data = base64.b64decode(photo.get('image_data', ''))
-                file_type = photo.get('file_type', 'image')
-                original_name = photo.get('original_name', '')
-                date_str = photo.get('data', 'unknown')
-                tipo = photo.get('tipo', 'allegato')
+        # NOTE: NO allegati nel ZIP - si scaricano singolarmente
+    
+    buffer.seek(0)
+    return buffer.getvalue()
                 
                 # Determine folder and extension based on file type
                 if file_type == 'image':
