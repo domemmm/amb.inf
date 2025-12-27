@@ -102,6 +102,8 @@ export const SchedaMedicazioneMED = ({ patientId, ambulatorio, schede, onRefresh
   const [selectedScheda, setSelectedScheda] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [formData, setFormData] = useState({
     data_compilazione: format(new Date(), "yyyy-MM-dd"),
     fondo: [],
@@ -112,6 +114,7 @@ export const SchedaMedicazioneMED = ({ patientId, ambulatorio, schede, onRefresh
     medicazione: DEFAULT_MEDICAZIONE,
     prossimo_cambio: "",
     firma: "",
+    photos: [], // Photos attached to this scheda
   });
 
   const handleToggle = (field, value, isEditMode = false) => {
