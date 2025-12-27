@@ -73,13 +73,20 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
   const [selectedScheda, setSelectedScheda] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [schedaType, setSchedaType] = useState("semplificata"); // "semplificata" or "completa"
+  const printRef = useRef(null);
   const [formData, setFormData] = useState({
+    scheda_type: "semplificata", // Track which type of scheda
     data_impianto: format(new Date(), "yyyy-MM-dd"),
+    // Common fields for both versions
+    presidio_impianto: "",
     tipo_catetere: "",
-    sede: "",
     braccio: "",
     vena: "",
+    tunnelizzazione: false,
     exit_site_cm: "",
+    // Complete version additional fields
+    sede: "",
     ecoguidato: false,
     igiene_mani: "",
     precauzioni_barriera: false,
@@ -92,6 +99,17 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
     motivazione: "",
     operatore: "",
     note: "",
+    // Additional fields for complete version
+    reparto_provenienza: "",
+    diagnosi: "",
+    n_lumi: "",
+    french: "",
+    lunghezza_catetere: "",
+    profondita_inserzione: "",
+    tip_location: "",
+    complicanze: "",
+    data_rimozione: "",
+    motivo_rimozione: "",
   });
 
   const handleCreate = async () => {
