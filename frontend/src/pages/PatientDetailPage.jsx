@@ -775,14 +775,63 @@ export default function PatientDetailPage() {
   );
 }
 
-// Photo Gallery Component
-function PhotoGallery({ patientId, ambulatorio, patientTipo, photos, onRefresh }) {
+// Allegati Gallery Component - Supports photos, PDF, Word, Excel
+function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefresh }) {
   const [uploading, setUploading] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
-  const handleUpload = async (e) => {
+  // Supported file types
+  const SUPPORTED_TYPES = {
+    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+    pdf: ['application/pdf'],
+    word: ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    excel: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+  };
+
+  const getAllSupportedTypes = () => [
+    ...SUPPORTED_TYPES.image,
+    ...SUPPORTED_TYPES.pdf,
+    ...SUPPORTED_TYPES.word,
+    ...SUPPORTED_TYPES.excel,
+  ].join(',');
+
+  const getFileType = (mimeType) => {
+    if (SUPPORTED_TYPES.image.includes(mimeType)) return 'image';
+    if (SUPPORTED_TYPES.pdf.includes(mimeType)) return 'pdf';
+    if (SUPPORTED_TYPES.word.includes(mimeType)) return 'word';
+    if (SUPPORTED_TYPES.excel.includes(mimeType)) return 'excel';
+    return 'other';
+  };
+
+  const getFileIcon = (fileType) => {
+    switch (fileType) {
+      case 'image': return <Image className="w-8 h-8 text-blue-500" />;
+      case 'pdf': return <FileText className="w-8 h-8 text-red-500" />;
+      case 'word': return <FileText className="w-8 h-8 text-blue-600" />;
+      case 'excel': return <FileSpreadsheet className="w-8 h-8 text-green-600" />;
+      default: return <File className="w-8 h-8 text-gray-500" />;
+    }
+  };
+
+  const handleUpload = async (e, isCamera = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file type
+    const fileType = getFileType(file.type);
+    if (fileType === 'other') {
+      toast.error("Tipo di file non supportato. Usa immagini, PDF, Word o Excel.");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File troppo grande. Massimo 10MB.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", file);
@@ -790,93 +839,194 @@ function PhotoGallery({ patientId, ambulatorio, patientTipo, photos, onRefresh }
     formData.append("ambulatorio", ambulatorio);
     formData.append("tipo", patientTipo === "MED" ? "MED" : "PICC");
     formData.append("data", format(new Date(), "yyyy-MM-dd"));
+    formData.append("file_type", fileType);
+    formData.append("original_name", file.name);
 
     setUploading(true);
     try {
       await apiClient.post("/photos", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success("Foto caricata");
+      toast.success(fileType === 'image' ? "Foto caricata" : "Documento caricato");
       onRefresh();
     } catch (error) {
       toast.error("Errore nel caricamento");
     } finally {
       setUploading(false);
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
   };
 
   const handleDelete = async (photoId) => {
     try {
       await apiClient.delete(`/photos/${photoId}`);
-      toast.success("Foto eliminata");
+      toast.success("Allegato eliminato");
       onRefresh();
     } catch (error) {
       toast.error("Errore nell'eliminazione");
     }
   };
 
+  const handleViewDocument = (photo) => {
+    const fileType = photo.file_type || 'image';
+    if (fileType === 'image') {
+      setSelectedPhoto(photo);
+    } else {
+      // For documents, open in new tab or download
+      const blob = new Blob(
+        [Uint8Array.from(atob(photo.image_data), c => c.charCodeAt(0))],
+        { type: photo.mime_type || 'application/pdf' }
+      );
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+  };
+
+  // Group files by type
+  const imageFiles = photos.filter(p => !p.file_type || p.file_type === 'image');
+  const documentFiles = photos.filter(p => p.file_type && p.file_type !== 'image');
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Galleria Foto</h2>
-        <label>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleUpload}
-            disabled={uploading}
-          />
-          <Button asChild disabled={uploading}>
-            <span>
-              <Camera className="w-4 h-4 mr-2" />
-              {uploading ? "Caricamento..." : "Carica Foto"}
-            </span>
-          </Button>
-        </label>
+        <h2 className="text-lg font-semibold">Allegati</h2>
+        <div className="flex gap-2">
+          {/* Camera button for photos */}
+          <label>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => handleUpload(e, true)}
+              disabled={uploading}
+            />
+            <Button asChild variant="outline" disabled={uploading}>
+              <span>
+                <Camera className="w-4 h-4 mr-2" />
+                Scatta Foto
+              </span>
+            </Button>
+          </label>
+          {/* Upload button for all files */}
+          <label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={getAllSupportedTypes()}
+              className="hidden"
+              onChange={handleUpload}
+              disabled={uploading}
+            />
+            <Button asChild disabled={uploading}>
+              <span>
+                <Upload className="w-4 h-4 mr-2" />
+                {uploading ? "Caricamento..." : "Carica File"}
+              </span>
+            </Button>
+          </label>
+        </div>
       </div>
 
       {photos.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Camera className="w-12 h-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Nessuna foto presente</p>
+            <Paperclip className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">Nessun allegato presente</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Supportati: Immagini, PDF, Word, Excel
+            </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {photos.map((photo) => (
-            <Card
-              key={photo.id}
-              className="overflow-hidden cursor-pointer group"
-              onClick={() => setSelectedPhoto(photo)}
-            >
-              <div className="aspect-square relative">
-                <img
-                  src={`data:image/jpeg;base64,${photo.image_data}`}
-                  alt={photo.descrizione || "Foto paziente"}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(photo.id);
-                    }}
+        <div className="space-y-6">
+          {/* Images Section */}
+          {imageFiles.length > 0 && (
+            <div>
+              <h3 className="text-md font-medium mb-3 flex items-center gap-2">
+                <Image className="w-4 h-4" /> Foto ({imageFiles.length})
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {imageFiles.map((photo) => (
+                  <Card
+                    key={photo.id}
+                    className="overflow-hidden cursor-pointer group"
+                    onClick={() => setSelectedPhoto(photo)}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                    <div className="aspect-square relative">
+                      <img
+                        src={`data:image/jpeg;base64,${photo.image_data}`}
+                        alt={photo.descrizione || "Foto paziente"}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(photo.id);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <CardContent className="p-2">
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(photo.data), "d MMM yyyy", { locale: it })}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-              <CardContent className="p-2">
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(photo.data), "d MMM yyyy", { locale: it })}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {documentFiles.length > 0 && (
+            <div>
+              <h3 className="text-md font-medium mb-3 flex items-center gap-2">
+                <FileText className="w-4 h-4" /> Documenti ({documentFiles.length})
+              </h3>
+              <div className="grid gap-3">
+                {documentFiles.map((doc) => (
+                  <Card
+                    key={doc.id}
+                    className="cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => handleViewDocument(doc)}
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(doc.file_type)}
+                        <div>
+                          <p className="font-medium">{doc.original_name || 'Documento'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(doc.data), "d MMM yyyy", { locale: it })}
+                            {doc.file_type && ` • ${doc.file_type.toUpperCase()}`}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(doc.id);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
