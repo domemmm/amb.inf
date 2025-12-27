@@ -96,6 +96,28 @@ export const Layout = () => {
     };
   }, [orientation]);
 
+  // Apply text zoom effect
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.fontSize = `${textZoom}%`;
+    localStorage.setItem("textZoom", textZoom.toString());
+    return () => {
+      root.style.fontSize = "100%";
+    };
+  }, [textZoom]);
+
+  const increaseZoom = () => {
+    setTextZoom(prev => Math.min(prev + 10, 150));
+  };
+
+  const decreaseZoom = () => {
+    setTextZoom(prev => Math.max(prev - 10, 70));
+  };
+
+  const resetZoom = () => {
+    setTextZoom(100);
+  };
+
   const handleAmbulatorioChange = (amb) => {
     selectAmbulatorio(amb);
     navigate("/dashboard");
