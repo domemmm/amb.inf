@@ -716,20 +716,48 @@ export const SchedaGestionePICC = ({ patientId, ambulatorio, schede, onRefresh, 
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Nuova Scheda Mensile PICC</DialogTitle>
-            <DialogDescription>Seleziona il mese per la nuova scheda</DialogDescription>
+            <DialogDescription>Seleziona mese e anno per la nuova scheda</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Mese</Label>
-              <Select value={newMese} onValueChange={setNewMese}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {generateMonthOptions().map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Mese</Label>
+                <Select 
+                  value={selectedMonth} 
+                  onValueChange={(val) => {
+                    setSelectedMonth(val);
+                    setNewMese(`${selectedYear}-${val}`);
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Mese" /></SelectTrigger>
+                  <SelectContent>
+                    {generateMonthOptionsOnly().map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Anno</Label>
+                <Select 
+                  value={selectedYear} 
+                  onValueChange={(val) => {
+                    setSelectedYear(val);
+                    setNewMese(`${val}-${selectedMonth}`);
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Anno" /></SelectTrigger>
+                  <SelectContent>
+                    {generateYearOptions().map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Scheda selezionata: <span className="font-medium capitalize">{format(new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1), "MMMM yyyy", { locale: it })}</span>
+            </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Annulla</Button>
               <Button onClick={handleCreate}>Crea Scheda</Button>
