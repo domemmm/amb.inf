@@ -342,21 +342,21 @@ export const Layout = () => {
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 border-b bg-card flex items-center justify-between px-4">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 border-b bg-card flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          {/* Home Button */}
+          {/* Home Button - Larger */}
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `flex items-center justify-center w-10 h-10 rounded-xl ${
+              `flex items-center justify-center w-12 h-12 rounded-xl ${
                 isActive ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
               }`
             }
           >
-            <Home className="w-5 h-5" />
+            <Home className="w-7 h-7" />
           </NavLink>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-primary text-sm">Ambulatorio</span>
+            <span className="font-semibold text-primary text-base">Ambulatorio</span>
           </div>
         </div>
         {renderTopRightMenu(true)}
