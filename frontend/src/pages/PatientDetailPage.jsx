@@ -877,17 +877,36 @@ function PhotoGallery({ patientId, ambulatorio, patientTipo, photos, onRefresh }
       {/* Photo Detail Dialog */}
       <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
         <DialogContent className="max-w-3xl">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>
               Foto del {selectedPhoto && format(new Date(selectedPhoto.data), "d MMMM yyyy", { locale: it })}
             </DialogTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setSelectedPhoto(null)}
+              className="h-8 w-8 rounded-full hover:bg-destructive/10"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </DialogHeader>
           {selectedPhoto && (
-            <img
-              src={`data:image/jpeg;base64,${selectedPhoto.image_data}`}
-              alt="Foto ingrandita"
-              className="w-full rounded-lg"
-            />
+            <div className="relative">
+              <img
+                src={`data:image/jpeg;base64,${selectedPhoto.image_data}`}
+                alt="Foto ingrandita"
+                className="w-full rounded-lg"
+              />
+              <Button 
+                variant="secondary" 
+                size="lg"
+                onClick={() => setSelectedPhoto(null)}
+                className="mt-4 w-full"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Chiudi Anteprima
+              </Button>
+            </div>
           )}
         </DialogContent>
       </Dialog>
