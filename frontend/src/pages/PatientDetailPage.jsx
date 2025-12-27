@@ -1114,17 +1114,58 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
                           </p>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(doc.id);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Download document
+                            const blob = new Blob(
+                              [Uint8Array.from(atob(doc.image_data), c => c.charCodeAt(0))],
+                              { type: doc.mime_type || 'application/pdf' }
+                            );
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = doc.original_name || 'documento';
+                            link.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Scarica
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Print document
+                            const blob = new Blob(
+                              [Uint8Array.from(atob(doc.image_data), c => c.charCodeAt(0))],
+                              { type: doc.mime_type || 'application/pdf' }
+                            );
+                            const url = URL.createObjectURL(blob);
+                            const printWindow = window.open(url, '_blank');
+                            printWindow.onload = () => printWindow.print();
+                          }}
+                        >
+                          <Printer className="w-4 h-4 mr-1" />
+                          Stampa
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(doc.id);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
