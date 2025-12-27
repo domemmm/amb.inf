@@ -1012,42 +1012,80 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
         </Card>
       ) : (
         <div className="space-y-6">
-          {/* Images Section */}
+          {/* Images Section - Now with download/print buttons */}
           {imageFiles.length > 0 && (
             <div>
               <h3 className="text-md font-medium mb-3 flex items-center gap-2">
-                <Image className="w-4 h-4" /> Foto ({imageFiles.length})
+                <Image className="w-4 h-4" /> Foto Allegate ({imageFiles.length})
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {imageFiles.map((photo) => (
-                  <Card
-                    key={photo.id}
-                    className="overflow-hidden cursor-pointer group"
-                    onClick={() => setSelectedPhoto(photo)}
-                  >
-                    <div className="aspect-square relative">
+                  <Card key={photo.id} className="overflow-hidden group">
+                    <div 
+                      className="aspect-square relative cursor-pointer"
+                      onClick={() => setSelectedPhoto(photo)}
+                    >
                       <img
                         src={`data:image/jpeg;base64,${photo.image_data}`}
-                        alt={photo.descrizione || "Foto paziente"}
+                        alt={photo.original_name || "Foto paziente"}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    </div>
+                    <CardContent className="p-2 space-y-2">
+                      <p className="text-xs font-medium truncate">{photo.original_name || "Foto"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(photo.data), "d MMM yyyy", { locale: it })}
+                      </p>
+                      <div className="flex gap-1">
                         <Button
-                          variant="destructive"
-                          size="icon"
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-7"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Download as PDF
+                            const link = document.createElement('a');
+                            link.href = `data:image/jpeg;base64,${photo.image_data}`;
+                            link.download = `${photo.original_name || 'foto'}.jpg`;
+                            link.click();
+                          }}
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Scarica
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-7"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Print image
+                            const printWindow = window.open('', '_blank');
+                            printWindow.document.write(`
+                              <html><head><title>${photo.original_name || 'Foto'}</title></head>
+                              <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+                              <img src="data:image/jpeg;base64,${photo.image_data}" style="max-width:100%;max-height:100vh;"/>
+                              </body></html>
+                            `);
+                            printWindow.document.close();
+                            printWindow.print();
+                          }}
+                        >
+                          <Printer className="w-3 h-3 mr-1" />
+                          Stampa
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDelete(photo.id);
                           }}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
-                    </div>
-                    <CardContent className="p-2">
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(photo.data), "d MMM yyyy", { locale: it })}
-                      </p>
                     </CardContent>
                   </Card>
                 ))}
@@ -1055,7 +1093,7 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
             </div>
           )}
 
-          {/* Documents Section */}
+          {/* Documents Section - with download/print */}
           {documentFiles.length > 0 && (
             <div>
               <h3 className="text-md font-medium mb-3 flex items-center gap-2">
@@ -1063,13 +1101,9 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
               </h3>
               <div className="grid gap-3">
                 {documentFiles.map((doc) => (
-                  <Card
-                    key={doc.id}
-                    className="cursor-pointer hover:border-primary/50 transition-colors"
-                    onClick={() => handleViewDocument(doc)}
-                  >
+                  <Card key={doc.id} className="hover:border-primary/50 transition-colors">
                     <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={() => handleViewDocument(doc)}>
                         {getFileIcon(doc.file_type)}
                         <div>
                           <p className="font-medium">{doc.original_name || 'Documento'}</p>
