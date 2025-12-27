@@ -1177,38 +1177,70 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
         </div>
       )}
 
-      {/* Photo Detail Dialog */}
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
+      {/* Photo Detail Dialog with rotation */}
+      <Dialog open={!!selectedPhoto} onOpenChange={() => {
+        setSelectedPhoto(null);
+        setPhotoRotation(0);
+      }}>
         <DialogContent className="max-w-3xl">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>
-              Foto del {selectedPhoto && format(new Date(selectedPhoto.data), "d MMMM yyyy", { locale: it })}
+              {selectedPhoto?.original_name || "Foto"} - {selectedPhoto && format(new Date(selectedPhoto.data), "d MMMM yyyy", { locale: it })}
             </DialogTitle>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setSelectedPhoto(null)}
-              className="h-8 w-8 rounded-full hover:bg-destructive/10"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setPhotoRotation(prev => (prev + 90) % 360)}
+                className="h-8 w-8"
+                title="Ruota foto"
+              >
+                <RotateCw className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => {
+                  setSelectedPhoto(null);
+                  setPhotoRotation(0);
+                }}
+                className="h-8 w-8 rounded-full hover:bg-destructive/10"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </DialogHeader>
           {selectedPhoto && (
-            <div className="relative">
-              <img
-                src={`data:image/jpeg;base64,${selectedPhoto.image_data}`}
-                alt="Foto ingrandita"
-                className="w-full rounded-lg"
-              />
-              <Button 
-                variant="secondary" 
-                size="lg"
-                onClick={() => setSelectedPhoto(null)}
-                className="mt-4 w-full"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Chiudi Anteprima
-              </Button>
+            <div className="relative flex flex-col items-center">
+              <div className="overflow-hidden rounded-lg max-h-[60vh]">
+                <img
+                  src={`data:image/jpeg;base64,${selectedPhoto.image_data}`}
+                  alt="Foto ingrandita"
+                  className="max-w-full max-h-[60vh] object-contain transition-transform duration-300"
+                  style={{ transform: `rotate(${photoRotation}deg)` }}
+                />
+              </div>
+              <div className="flex gap-2 mt-4 w-full">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setPhotoRotation(prev => (prev + 90) % 360)}
+                  className="flex-1"
+                >
+                  <RotateCw className="h-4 w-4 mr-2" />
+                  Ruota 90°
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => {
+                    setSelectedPhoto(null);
+                    setPhotoRotation(0);
+                  }}
+                  className="flex-1"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Chiudi
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
