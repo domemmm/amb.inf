@@ -920,14 +920,19 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
                 )}
               </DialogTitle>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={handlePrintScheda}>
-                  <Printer className="w-4 h-4 mr-2" />
-                  Stampa
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
-                  <FileDown className="w-4 h-4 mr-2" />
-                  PDF
-                </Button>
+                {/* Only show PDF/Stampa for COMPLETE scheda */}
+                {selectedScheda?.scheda_type !== "semplificata" && (
+                  <>
+                    <Button variant="outline" size="sm" onClick={handlePrintScheda}>
+                      <Printer className="w-4 h-4 mr-2" />
+                      Stampa
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+                      <FileDown className="w-4 h-4 mr-2" />
+                      PDF
+                    </Button>
+                  </>
+                )}
                 {!isEditing && (
                   <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                     <Edit2 className="w-4 h-4 mr-2" />
