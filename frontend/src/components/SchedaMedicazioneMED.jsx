@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Copy, FileText, Edit2, Save, Printer, Trash2 } from "lucide-react";
+import { Plus, Copy, FileText, Edit2, Save, Printer, Trash2, Camera, Upload, Image, X, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
