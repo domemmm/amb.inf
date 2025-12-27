@@ -112,23 +112,14 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
     try {
       await apiClient.put(`/schede-impianto-picc/${selectedScheda.id}`, {
         data_impianto: selectedScheda.data_impianto,
+        presidio_impianto: selectedScheda.presidio_impianto,
         tipo_catetere: selectedScheda.tipo_catetere,
-        sede: selectedScheda.sede,
         braccio: selectedScheda.braccio,
         vena: selectedScheda.vena,
         exit_site_cm: selectedScheda.exit_site_cm,
-        ecoguidato: selectedScheda.ecoguidato,
-        igiene_mani: selectedScheda.igiene_mani,
-        precauzioni_barriera: selectedScheda.precauzioni_barriera,
-        disinfettante: selectedScheda.disinfettante,
-        sutureless_device: selectedScheda.sutureless_device,
-        medicazione_trasparente: selectedScheda.medicazione_trasparente,
-        controllo_rx: selectedScheda.controllo_rx,
-        controllo_ecg: selectedScheda.controllo_ecg,
-        modalita: selectedScheda.modalita,
-        motivazione: selectedScheda.motivazione,
+        tunnelizzazione: selectedScheda.tunnelizzazione,
+        tunnelizzazione_note: selectedScheda.tunnelizzazione_note,
         operatore: selectedScheda.operatore,
-        note: selectedScheda.note,
       });
       toast.success("Scheda aggiornata");
       setIsEditing(false);
