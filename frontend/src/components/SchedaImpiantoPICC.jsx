@@ -322,15 +322,34 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
       </div>
 
       {/* Tunnelizzazione */}
-      <div className="flex items-center space-x-3 p-3 border rounded-lg">
-        <Checkbox
-          id={`tunnelizzazione-${isEditMode ? 'edit' : 'new'}`}
-          checked={data.tunnelizzazione || false}
-          onCheckedChange={(checked) => updateField("tunnelizzazione", !!checked, isEditMode)}
-        />
-        <Label htmlFor={`tunnelizzazione-${isEditMode ? 'edit' : 'new'}`} className="font-medium">
-          Tunnelizzazione
-        </Label>
+      <div className="space-y-3">
+        <div className="flex items-center space-x-3 p-3 border rounded-lg">
+          <Checkbox
+            id={`tunnelizzazione-${isEditMode ? 'edit' : 'new'}`}
+            checked={data.tunnelizzazione || false}
+            onCheckedChange={(checked) => updateField("tunnelizzazione", !!checked, isEditMode)}
+          />
+          <Label htmlFor={`tunnelizzazione-${isEditMode ? 'edit' : 'new'}`} className="font-medium">
+            Tunnelizzazione
+          </Label>
+        </div>
+        {/* Campo note che appare solo quando tunnelizzazione è selezionato */}
+        {data.tunnelizzazione && (
+          <div className="ml-6 space-y-1">
+            <Label className="text-sm">Note (max 6 caratteri)</Label>
+            <Input
+              value={data.tunnelizzazione_note || ""}
+              onChange={(e) => {
+                // Limita a 6 caratteri
+                const value = e.target.value.slice(0, 6);
+                updateField("tunnelizzazione_note", value, isEditMode);
+              }}
+              placeholder="Note"
+              maxLength={6}
+              className="w-24"
+            />
+          </div>
+        )}
       </div>
 
       {/* Exit-site */}
