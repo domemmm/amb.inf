@@ -20,7 +20,7 @@ const DOCUMENT_TEMPLATES = {
     { id: "consent_picc_2", nome: "Consenso Informato PICC e Midline", tipo_file: "pdf", url: "https://customer-assets.emergentagent.com/job_medhub-38/artifacts/siz46bgw_CONSENSO%20INFORMATO%20PICC%20E%20MIDLINE.pdf" },
     { id: "brochure_picc_port", nome: "Brochure PICC Port", tipo_file: "pdf", url: "https://customer-assets.emergentagent.com/job_medhub-38/artifacts/cein282q_Picc%20Port.pdf" },
     { id: "brochure_picc", nome: "Brochure PICC", tipo_file: "pdf", url: "https://customer-assets.emergentagent.com/job_medhub-38/artifacts/kk882djy_Picc.pdf" },
-    { id: "scheda_impianto_picc", nome: "Scheda Impianto PICC", tipo_file: "pdf", url: "https://customer-assets.emergentagent.com/job_medhub-38/artifacts/sbw1iws9_Sch%20Impianto%20Gestione%20AV%20NEW.pdf" },
+    { id: "scheda_medicazione_picc", nome: "Scheda Medicazione PICC", tipo_file: "pdf", url: "https://customer-assets.emergentagent.com/job_medhub-38/artifacts/sbw1iws9_Sch%20Impianto%20Gestione%20AV%20NEW.pdf" },
     { id: "specifiche_impianto_picc", nome: "Specifiche Impianto", tipo_file: "pdf", url: "https://customer-assets.emergentagent.com/job_medhub-38/artifacts/03keycn2_specifiche%20impianto.pdf" },
   ],
 };
