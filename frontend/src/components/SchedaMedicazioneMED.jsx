@@ -644,7 +644,7 @@ export const SchedaMedicazioneMED = ({ patientId, ambulatorio, schede, onRefresh
           
           {/* Photo preview - placeholder for now */}
           <p className="text-xs text-muted-foreground">
-            Le foto caricate saranno visibili nella sezione Allegati del paziente e incluse nel PDF della scheda.
+            Le foto rimangono all'interno della scheda medicazione. Non vengono incluse nel PDF quando scarichi/stampi.
           </p>
         </div>
       </div>
