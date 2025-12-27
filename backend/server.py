@@ -271,13 +271,16 @@ class SchedaGestionePICC(BaseModel):
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
-# Photo
+# Photo / Attachment
 class PhotoCreate(BaseModel):
     patient_id: str
     ambulatorio: Ambulatorio
-    tipo: str  # MED or PICC
+    tipo: str  # MED, PICC, MED_SCHEDA
     descrizione: Optional[str] = None
     data: str
+    file_type: Optional[str] = "image"  # image, pdf, word, excel
+    original_name: Optional[str] = None
+    scheda_med_id: Optional[str] = None  # Link to specific scheda MED
 
 class Photo(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -288,6 +291,10 @@ class Photo(BaseModel):
     descrizione: Optional[str] = None
     data: str
     image_data: str  # Base64
+    file_type: Optional[str] = "image"  # image, pdf, word, excel
+    original_name: Optional[str] = None
+    mime_type: Optional[str] = None
+    scheda_med_id: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 # Document Templates
