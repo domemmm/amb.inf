@@ -684,9 +684,9 @@ export default function PatientDetailPage() {
           </TabsContent>
         )}
 
-        {/* Photos Tab */}
-        <TabsContent value="foto">
-          <PhotoGallery
+        {/* Allegati Tab */}
+        <TabsContent value="allegati">
+          <AllegatiGallery
             patientId={patientId}
             ambulatorio={ambulatorio}
             patientTipo={patient.tipo}
