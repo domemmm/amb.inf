@@ -174,7 +174,10 @@ export const SchedaGestionePICC = ({ patientId, ambulatorio, schede, onRefresh, 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedScheda, setSelectedScheda] = useState(null);
-  const [newMese, setNewMese] = useState(format(new Date(), "yyyy-MM"));
+  // Default to December 2025
+  const [newMese, setNewMese] = useState("2025-12");
+  const [selectedYear, setSelectedYear] = useState("2025");
+  const [selectedMonth, setSelectedMonth] = useState("12");
   
   // State for dynamic columns (dates)
   const [columns, setColumns] = useState([]);
