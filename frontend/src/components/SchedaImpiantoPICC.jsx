@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { apiClient } from "@/App";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, FileText, Edit2, Trash2, Save } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus, FileText, Edit2, Trash2, Save, Printer, Download, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
