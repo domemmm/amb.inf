@@ -919,7 +919,7 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
               accept="image/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => handleUpload(e, true)}
+              onChange={(e) => handleFileSelect(e, true)}
               disabled={uploading}
             />
             <Button asChild variant="outline" disabled={uploading}>
@@ -936,7 +936,7 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
               type="file"
               accept={getAllSupportedTypes()}
               className="hidden"
-              onChange={handleUpload}
+              onChange={handleFileSelect}
               disabled={uploading}
             />
             <Button asChild disabled={uploading}>
@@ -948,6 +948,57 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
           </label>
         </div>
       </div>
+
+      {/* Upload Name Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setUploadDialogOpen(false);
+          setPendingFile(null);
+          setFileName("");
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nome Allegato</DialogTitle>
+            <DialogDescription>
+              Inserisci un nome per questo allegato
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+              {pendingFile && getFileIcon(pendingFile.fileType)}
+              <div>
+                <p className="font-medium">{pendingFile?.file?.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {pendingFile?.fileType?.toUpperCase()} • {pendingFile?.file && (pendingFile.file.size / 1024).toFixed(0)} KB
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Nome del file</Label>
+              <Input
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                placeholder="Es: Referto esami, Foto lesione..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Le foto verranno salvate come allegati PDF
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setUploadDialogOpen(false);
+                setPendingFile(null);
+              }}>
+                Annulla
+              </Button>
+              <Button onClick={handleUploadConfirm} disabled={uploading}>
+                {uploading ? "Caricamento..." : "Carica"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {photos.length === 0 ? (
         <Card>
