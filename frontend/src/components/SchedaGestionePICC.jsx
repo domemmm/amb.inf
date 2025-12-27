@@ -185,9 +185,14 @@ export const SchedaGestionePICC = ({ patientId, ambulatorio, schede, onRefresh, 
 
   const generateMonthOptions = () => {
     const options = [];
-    const currentYear = new Date().getFullYear();
-    for (let year = currentYear - 1; year <= currentYear + 2; year++) {
-      for (let month = 1; month <= 12; month++) {
+    // Start from December 2025 and go until 2040
+    const startYear = 2025;
+    const startMonth = 12; // December
+    const endYear = 2040;
+    
+    for (let year = startYear; year <= endYear; year++) {
+      const monthStart = (year === startYear) ? startMonth : 1;
+      for (let month = monthStart; month <= 12; month++) {
         options.push({
           value: `${year}-${month.toString().padStart(2, "0")}`,
           label: format(new Date(year, month - 1), "MMMM yyyy", { locale: it }),
@@ -195,6 +200,32 @@ export const SchedaGestionePICC = ({ patientId, ambulatorio, schede, onRefresh, 
       }
     }
     return options;
+  };
+
+  // Separate options for year and month selectors
+  const generateYearOptions = () => {
+    const years = [];
+    for (let year = 2025; year <= 2040; year++) {
+      years.push({ value: year.toString(), label: year.toString() });
+    }
+    return years;
+  };
+
+  const generateMonthOptionsOnly = () => {
+    return [
+      { value: "01", label: "Gennaio" },
+      { value: "02", label: "Febbraio" },
+      { value: "03", label: "Marzo" },
+      { value: "04", label: "Aprile" },
+      { value: "05", label: "Maggio" },
+      { value: "06", label: "Giugno" },
+      { value: "07", label: "Luglio" },
+      { value: "08", label: "Agosto" },
+      { value: "09", label: "Settembre" },
+      { value: "10", label: "Ottobre" },
+      { value: "11", label: "Novembre" },
+      { value: "12", label: "Dicembre" },
+    ];
   };
 
   const getAvailableDates = (mese) => {
