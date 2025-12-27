@@ -904,30 +904,9 @@ def generate_scheda_impianto_pdf(scheda: dict, patient: dict) -> bytes:
     doc.build(story)
     buffer.seek(0)
     return buffer.getvalue()
-    
-    story.append(Spacer(1, 15))
-    
-    # Footer
-    footer_data = [
-        ["DATA POSIZIONAMENTO:", scheda.get('data_impianto', '-')],
-        ["OPERATORE:", scheda.get('operatore', '-')],
-        ["FIRMA:", "_" * 40],
-    ]
-    footer_table = Table(footer_data, colWidths=[5*cm, 13*cm])
-    footer_table.setStyle(TableStyle([
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0f0f0')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-    ]))
-    story.append(footer_table)
-    
-    # Notes if present
-    if scheda.get('note'):
-        story.append(Spacer(1, 10))
+
+
+# ============== STATISTICS =============
         story.append(Paragraph("<b>NOTE:</b>", bold_style))
         story.append(Paragraph(scheda.get('note', ''), normal_style))
     
