@@ -234,7 +234,78 @@ export const SchedaMedicazioneMED = ({ patientId, ambulatorio, schede, onRefresh
       medicazione: DEFAULT_MEDICAZIONE,
       prossimo_cambio: "",
       firma: "",
+      photos: [],
     });
+  };
+
+  // Handle photo upload for scheda
+  const handlePhotoUpload = async (e, schedaId = null) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Only accept images
+    if (!file.type.startsWith('image/')) {
+      toast.error("Solo immagini sono supportate per le schede MED");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      formDataUpload.append("patient_id", patientId);
+      formDataUpload.append("ambulatorio", ambulatorio);
+      formDataUpload.append("tipo", "MED_SCHEDA");
+      formDataUpload.append("data", format(new Date(), "yyyy-MM-dd"));
+      formDataUpload.append("scheda_med_id", schedaId || "pending");
+      formDataUpload.append("file_type", "image");
+
+      const response = await apiClient.post("/photos", formDataUpload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (schedaId) {
+        // Update existing scheda with new photo
+        const currentPhotos = selectedScheda?.photos || [];
+        setSelectedScheda(prev => ({
+          ...prev,
+          photos: [...currentPhotos, response.data.id]
+        }));
+        toast.success("Foto aggiunta alla scheda");
+        onRefresh();
+      } else {
+        // Add to form for new scheda
+        setFormData(prev => ({
+          ...prev,
+          photos: [...(prev.photos || []), response.data.id]
+        }));
+        toast.success("Foto caricata");
+      }
+    } catch (error) {
+      toast.error("Errore nel caricamento della foto");
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  // Delete photo from scheda
+  const handleDeleteSchedaPhoto = async (photoId, schedaId = null) => {
+    try {
+      await apiClient.delete(`/photos/${photoId}`);
+      if (schedaId) {
+        toast.success("Foto rimossa dalla scheda");
+        onRefresh();
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          photos: prev.photos.filter(id => id !== photoId)
+        }));
+        toast.success("Foto rimossa");
+      }
+    } catch (error) {
+      toast.error("Errore nella rimozione della foto");
+    }
   };
 
   // Print function for MED scheda with requested format
