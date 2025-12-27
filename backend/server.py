@@ -730,7 +730,7 @@ async def update_scheda_gestione_picc(scheda_id: str, data: dict, payload: dict 
     updated = await db.schede_gestione_picc.find_one({"id": scheda_id}, {"_id": 0})
     return updated
 
-# ============== PHOTOS ==============
+# ============== PHOTOS / ATTACHMENTS ==============
 @api_router.post("/photos")
 async def upload_photo(
     patient_id: str = Form(...),
@@ -738,6 +738,9 @@ async def upload_photo(
     tipo: str = Form(...),
     data: str = Form(...),
     descrizione: Optional[str] = Form(None),
+    file_type: Optional[str] = Form("image"),
+    original_name: Optional[str] = Form(None),
+    scheda_med_id: Optional[str] = Form(None),
     file: UploadFile = File(...),
     payload: dict = Depends(verify_token)
 ):
@@ -747,18 +750,34 @@ async def upload_photo(
     contents = await file.read()
     image_data = base64.b64encode(contents).decode('utf-8')
     
+    # Determine file type from content type if not provided
+    mime_type = file.content_type
+    if not file_type or file_type == "image":
+        if mime_type and 'pdf' in mime_type:
+            file_type = 'pdf'
+        elif mime_type and ('word' in mime_type or 'document' in mime_type):
+            file_type = 'word'
+        elif mime_type and ('excel' in mime_type or 'spreadsheet' in mime_type):
+            file_type = 'excel'
+        elif mime_type and mime_type.startswith('image/'):
+            file_type = 'image'
+    
     photo = Photo(
         patient_id=patient_id,
         ambulatorio=Ambulatorio(ambulatorio),
         tipo=tipo,
         descrizione=descrizione,
         data=data,
-        image_data=image_data
+        image_data=image_data,
+        file_type=file_type,
+        original_name=original_name or file.filename,
+        mime_type=mime_type,
+        scheda_med_id=scheda_med_id if scheda_med_id != "pending" else None
     )
     doc = photo.model_dump()
     await db.photos.insert_one(doc)
     
-    return {"id": photo.id, "message": "Foto caricata"}
+    return {"id": photo.id, "message": "File caricato"}
 
 @api_router.get("/photos")
 async def get_photos(
