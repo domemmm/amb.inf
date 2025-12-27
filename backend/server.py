@@ -1301,7 +1301,7 @@ async def get_implant_statistics(
 
 # ============== PATIENT FOLDER DOWNLOAD ==============
 def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list, schede_gestione: list, photos: list) -> bytes:
-    """Generate a PDF with all patient data"""
+    """Generate a PDF with patient data - NO allegati, NO foto in scheda MED, only COMPLETE scheda impianto"""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
     
@@ -1316,7 +1316,7 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
     story.append(Paragraph(f"Cartella Clinica - {patient.get('cognome', '')} {patient.get('nome', '')}", title_style))
     story.append(Spacer(1, 20))
     
-    # Patient Info
+    # SEZIONE 1: Dati Anagrafici
     story.append(Paragraph("Dati Anagrafici", heading_style))
     info_data = [
         ["Nome:", patient.get('nome', '-')],
@@ -1324,6 +1324,7 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
         ["Tipo:", patient.get('tipo', '-')],
         ["Codice Fiscale:", patient.get('codice_fiscale', '-')],
         ["Data di Nascita:", patient.get('data_nascita', '-')],
+        ["Sesso:", patient.get('sesso', '-')],
         ["Telefono:", patient.get('telefono', '-')],
         ["Email:", patient.get('email', '-')],
         ["Medico di Base:", patient.get('medico_base', '-')],
@@ -1339,68 +1340,65 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
     story.append(table)
     story.append(Spacer(1, 20))
     
-    # Anamnesi
-    if patient.get('anamnesi'):
+    # SEZIONE 2: Anamnesi
+    if patient.get('anamnesi') or patient.get('terapia_in_atto') or patient.get('allergie'):
         story.append(Paragraph("Anamnesi", heading_style))
-        story.append(Paragraph(patient.get('anamnesi', '-'), normal_style))
-        story.append(Spacer(1, 10))
-    
-    if patient.get('terapia_in_atto'):
-        story.append(Paragraph("Terapia in Atto", heading_style))
-        story.append(Paragraph(patient.get('terapia_in_atto', '-'), normal_style))
-        story.append(Spacer(1, 10))
-    
-    if patient.get('allergie'):
-        story.append(Paragraph("Allergie", heading_style))
-        story.append(Paragraph(patient.get('allergie', '-'), normal_style))
-        story.append(Spacer(1, 10))
-    
-    # MED Schede with photos embedded as images
-    if schede_med:
+        if patient.get('anamnesi'):
+            story.append(Paragraph(f"<b>Anamnesi:</b> {patient.get('anamnesi', '-')}", normal_style))
+        if patient.get('terapia_in_atto'):
+            story.append(Paragraph(f"<b>Terapia in Atto:</b> {patient.get('terapia_in_atto', '-')}", normal_style))
+        if patient.get('allergie'):
+            story.append(Paragraph(f"<b>Allergie:</b> {patient.get('allergie', '-')}", normal_style))
         story.append(Spacer(1, 20))
+    
+    # SEZIONE 3: Schede Medicazione MED (senza anagrafica, senza foto)
+    if schede_med:
         story.append(Paragraph("Schede Medicazione MED", heading_style))
         for idx, scheda in enumerate(schede_med, 1):
-            story.append(Paragraph(f"<b>Medicazione #{idx} - {scheda.get('data_compilazione', '-')}</b>", normal_style))
+            story.append(Paragraph(f"<b>Medicazione #{idx} - Data: {scheda.get('data_compilazione', '-')}</b>", normal_style))
             story.append(Paragraph(f"Fondo: {', '.join(scheda.get('fondo', [])) or '-'}", normal_style))
             story.append(Paragraph(f"Margini: {', '.join(scheda.get('margini', [])) or '-'}", normal_style))
             story.append(Paragraph(f"Cute perilesionale: {', '.join(scheda.get('cute_perilesionale', [])) or '-'}", normal_style))
-            story.append(Paragraph(f"Essudato: {scheda.get('essudato_quantita', '-')} - {', '.join(scheda.get('essudato_tipo', [])) or '-'}", normal_style))
+            story.append(Paragraph(f"Essudato Quantità: {scheda.get('essudato_quantita', '-')}", normal_style))
+            story.append(Paragraph(f"Essudato Tipo: {', '.join(scheda.get('essudato_tipo', [])) or '-'}", normal_style))
             if scheda.get('medicazione'):
                 story.append(Paragraph(f"Medicazione: {scheda.get('medicazione', '-')}", normal_style))
-            
-            # Include photos linked to this MED scheda as images
-            scheda_id = scheda.get('id')
-            scheda_photos = [p for p in photos if p.get('scheda_med_id') == scheda_id or 
-                           (p.get('tipo') == 'MED_SCHEDA' and p.get('file_type') == 'image')]
-            if scheda_photos:
-                story.append(Paragraph("<b>Foto della lesione:</b>", normal_style))
-                for photo in scheda_photos[:3]:  # Max 3 photos per scheda
-                    try:
-                        img_data = base64.b64decode(photo.get('image_data', ''))
-                        img_buffer = io.BytesIO(img_data)
-                        img = RLImage(img_buffer, width=8*cm, height=6*cm)
-                        story.append(img)
-                        story.append(Spacer(1, 5))
-                    except Exception as e:
-                        story.append(Paragraph(f"[Foto non disponibile]", normal_style))
-            
-            story.append(Spacer(1, 10))
+            if scheda.get('prossimo_cambio'):
+                story.append(Paragraph(f"Prossimo Cambio: {scheda.get('prossimo_cambio', '-')}", normal_style))
+            if scheda.get('firma'):
+                story.append(Paragraph(f"Firma Operatore: {scheda.get('firma', '-')}", normal_style))
+            # NOTE: NO foto qui - le foto rimangono solo nell'applicativo
+            story.append(Spacer(1, 15))
+        story.append(Spacer(1, 10))
     
-    # PICC Impianto Schede
-    if schede_impianto:
-        story.append(Spacer(1, 20))
-        story.append(Paragraph("Schede Impianto PICC", heading_style))
-        for idx, scheda in enumerate(schede_impianto, 1):
-            story.append(Paragraph(f"<b>Impianto #{idx} - {scheda.get('data_impianto', '-')}</b>", normal_style))
+    # SEZIONE 4: Schede Impianto PICC - SOLO schede COMPLETE (no semplificata)
+    # Filtro solo schede complete (priorità a complete)
+    schede_complete = [s for s in schede_impianto if s.get('scheda_type') != 'semplificata']
+    if schede_complete:
+        story.append(Paragraph("Schede Impianto PICC (Complete)", heading_style))
+        for idx, scheda in enumerate(schede_complete, 1):
+            story.append(Paragraph(f"<b>Impianto #{idx} - Data: {scheda.get('data_impianto', '-')}</b>", normal_style))
+            story.append(Paragraph(f"Presidio: {scheda.get('presidio_impianto', '-')}", normal_style))
             story.append(Paragraph(f"Tipo Catetere: {scheda.get('tipo_catetere', '-')}", normal_style))
             story.append(Paragraph(f"Sede: {scheda.get('sede', '-')}", normal_style))
-            story.append(Paragraph(f"Braccio: {scheda.get('braccio', '-')}", normal_style))
+            story.append(Paragraph(f"Braccio: {'Destro' if scheda.get('braccio') == 'dx' else 'Sinistro' if scheda.get('braccio') == 'sn' else '-'}", normal_style))
             story.append(Paragraph(f"Vena: {scheda.get('vena', '-')}", normal_style))
+            story.append(Paragraph(f"Exit-site: {scheda.get('exit_site_cm', '-')} cm", normal_style))
+            story.append(Paragraph(f"Tunnelizzazione: {'Sì' if scheda.get('tunnelizzazione') else 'No'}", normal_style))
+            story.append(Paragraph(f"Ecoguidato: {'Sì' if scheda.get('ecoguidato') else 'No'}", normal_style))
+            story.append(Paragraph(f"Precauzioni Barriera: {'Sì' if scheda.get('precauzioni_barriera') else 'No'}", normal_style))
+            story.append(Paragraph(f"Disinfezione: {scheda.get('disinfettante', '-')}", normal_style))
+            story.append(Paragraph(f"Sutureless Device: {'Sì' if scheda.get('sutureless_device') else 'No'}", normal_style))
+            story.append(Paragraph(f"Medicazione Trasparente: {'Sì' if scheda.get('medicazione_trasparente') else 'No'}", normal_style))
+            story.append(Paragraph(f"Controllo RX: {'Sì' if scheda.get('controllo_rx') else 'No'}", normal_style))
+            story.append(Paragraph(f"Controllo ECG: {'Sì' if scheda.get('controllo_ecg') else 'No'}", normal_style))
             story.append(Paragraph(f"Modalità: {scheda.get('modalita', '-')}", normal_style))
+            story.append(Paragraph(f"Motivazione: {scheda.get('motivazione', '-')}", normal_style))
             story.append(Paragraph(f"Operatore: {scheda.get('operatore', '-')}", normal_style))
             if scheda.get('note'):
                 story.append(Paragraph(f"Note: {scheda.get('note', '-')}", normal_style))
-            story.append(Spacer(1, 10))
+            story.append(Spacer(1, 15))
+        story.append(Spacer(1, 10))
     
     # PICC Gestione Schede (Monthly Management)
     if schede_gestione:
