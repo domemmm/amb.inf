@@ -1156,7 +1156,7 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
         story.append(Paragraph(patient.get('allergie', '-'), normal_style))
         story.append(Spacer(1, 10))
     
-    # MED Schede
+    # MED Schede with photos embedded as images
     if schede_med:
         story.append(Spacer(1, 20))
         story.append(Paragraph("Schede Medicazione MED", heading_style))
@@ -1168,6 +1168,23 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
             story.append(Paragraph(f"Essudato: {scheda.get('essudato_quantita', '-')} - {', '.join(scheda.get('essudato_tipo', [])) or '-'}", normal_style))
             if scheda.get('medicazione'):
                 story.append(Paragraph(f"Medicazione: {scheda.get('medicazione', '-')}", normal_style))
+            
+            # Include photos linked to this MED scheda as images
+            scheda_id = scheda.get('id')
+            scheda_photos = [p for p in photos if p.get('scheda_med_id') == scheda_id or 
+                           (p.get('tipo') == 'MED_SCHEDA' and p.get('file_type') == 'image')]
+            if scheda_photos:
+                story.append(Paragraph("<b>Foto della lesione:</b>", normal_style))
+                for photo in scheda_photos[:3]:  # Max 3 photos per scheda
+                    try:
+                        img_data = base64.b64decode(photo.get('image_data', ''))
+                        img_buffer = io.BytesIO(img_data)
+                        img = RLImage(img_buffer, width=8*cm, height=6*cm)
+                        story.append(img)
+                        story.append(Spacer(1, 5))
+                    except Exception as e:
+                        story.append(Paragraph(f"[Foto non disponibile]", normal_style))
+            
             story.append(Spacer(1, 10))
     
     # PICC Impianto Schede
