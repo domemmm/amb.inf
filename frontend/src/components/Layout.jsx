@@ -152,6 +152,45 @@ export const Layout = () => {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Impostazioni Display</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        
+        {/* Text Zoom Section */}
+        <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center gap-2">
+          <Type className="w-3 h-3" />
+          Dimensione Testo ({textZoom}%)
+        </DropdownMenuLabel>
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={decreaseZoom}
+            disabled={textZoom <= 70}
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-medium w-12 text-center">{textZoom}%</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs h-6 px-2"
+              onClick={resetZoom}
+            >
+              Reset
+            </Button>
+          </div>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={increaseZoom}
+            disabled={textZoom >= 150}
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={toggleFullscreen}>
           {isFullscreen ? (
             <>
