@@ -1,0 +1,194 @@
+{
+  "identity": {
+    "name": "Ambulatorio Infermieristico",
+    "tone": "Professional, Sterile, Efficient, Trustworthy",
+    "aesthetic": "Swiss Medical",
+    "description": "A high-precision nursing dashboard focusing on speed, clarity, and hygiene. The interface mimics the cleanliness of a sterile field—white, organized, and free of clutter."
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Manrope, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    },
+    "sizes": {
+      "h1": "text-4xl font-bold tracking-tight",
+      "h2": "text-3xl font-bold tracking-tight",
+      "h3": "text-2xl font-semibold tracking-tight",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm font-medium text-muted-foreground",
+      "tiny": "text-xs font-medium uppercase tracking-wider"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Sterile Blue",
+        "hex": "#0052CC",
+        "hsl": "216 100% 40%",
+        "usage": "Primary buttons, active states, key headers"
+      },
+      "secondary": {
+        "name": "Scrub Green",
+        "hex": "#E6F4F1",
+        "hsl": "170 40% 93%",
+        "usage": "Secondary backgrounds, success accents"
+      },
+      "background": {
+        "name": "Clinical White",
+        "hex": "#FFFFFF",
+        "hsl": "0 0% 100%",
+        "usage": "Main background, cards"
+      },
+      "surface": {
+        "name": "Paper Grey",
+        "hex": "#F8F9FA",
+        "hsl": "210 20% 98%",
+        "usage": "Dashboard background, sidebar"
+      },
+      "destructive": {
+        "name": "Emergency Red",
+        "hex": "#EF4444",
+        "hsl": "0 84% 60%",
+        "usage": "Delete actions, critical alerts"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#64748B",
+        "muted": "#94A3B8"
+      }
+    },
+    "css_variables_update": {
+      "instruction": "Update /app/frontend/src/index.css with these HSL values for the :root theme to replace the default black/white monochrome.",
+      "variables": {
+        "--primary": "216 100% 40%",
+        "--primary-foreground": "0 0% 100%",
+        "--secondary": "170 40% 93%",
+        "--secondary-foreground": "216 100% 40%",
+        "--muted": "210 20% 96%",
+        "--muted-foreground": "215 16% 47%",
+        "--accent": "210 40% 96%",
+        "--accent-foreground": "216 100% 40%",
+        "--background": "0 0% 100%",
+        "--foreground": "222 47% 11%"
+      }
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
+      "form_layout": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "card_grid": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "section_gap": "gap-8",
+      "item_gap": "gap-4"
+    },
+    "containers": {
+      "main_wrapper": "min-h-screen bg-background font-sans antialiased",
+      "content_area": "max-w-7xl mx-auto w-full"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md shadow-sm transition-all font-medium",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2 rounded-md font-medium",
+      "ghost": "hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 rounded-md font-medium",
+      "outline": "border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 rounded-md font-medium"
+    },
+    "cards": {
+      "style": "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "header": "flex flex-col space-y-1.5 p-6",
+      "content": "p-6 pt-0",
+      "footer": "flex items-center p-6 pt-0"
+    },
+    "inputs": {
+      "style": "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    "custom_components": {
+      "BodyMap": {
+        "description": "An interactive SVG component representing the human body.",
+        "features": [
+          "Clickable zones (Head, Chest, Arms, Legs, Feet)",
+          "Visual feedback on hover (fill color change)",
+          "Selection state (highlighted zone)",
+          "Ability to place 'markers' (dots) on specific coordinates for wounds"
+        ],
+        "implementation_note": "Use a standard SVG silhouette. Wrap paths in clickable groups. Use React state to track selected zones."
+      },
+      "AgendaCalendar": {
+        "description": "A specialized calendar view for nursing appointments.",
+        "features": [
+          "Views: Month, Week, Day",
+          "Time slots: 30 minutes fixed",
+          "Color coding: Blue for MED, Green for PICC",
+          "Drag and drop support (optional but preferred)"
+        ]
+      }
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
+      "medium": "shadow-[0_4px_16px_rgba(0,0,0,0.08)]",
+      "hover": "hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-shadow duration-300"
+    },
+    "borders": {
+      "subtle": "border border-slate-100",
+      "default": "border border-slate-200",
+      "active": "border-primary"
+    },
+    "glassmorphism": {
+      "header": "bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50"
+    }
+  },
+  "image_urls": {
+    "login_background": {
+      "url": "https://images.unsplash.com/photo-1542993357-229426d6a212?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBtZWRpY2FsJTIwY2xpbmljJTIwaW50ZXJpb3IlMjBtaW5pbWFsJTIwYnJpZ2h0fGVufDB8fHx3aGl0ZXwxNzY2NjUzOTY0fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Clean, white medical hallway for login background. Use with overlay."
+    },
+    "avatars": [
+      {
+        "url": "https://images.unsplash.com/photo-1621862912856-0909fb7f14b7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxudXJzZSUyMHByb2Zlc3Npb25hbCUyMHBvcnRyYWl0JTIwbWVkaWNhbCUyMHNjcnVifGVufDB8fHxibHVlfDE3NjY2NTM5NjZ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Professional nurse avatar 1"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1584421051105-5df9e20d9e77?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBtZWRpY2FsJTIwY2xpbmljJTIwaW50ZXJpb3IlMjBtaW5pbWFsJTIwYnJpZ2h0fGVufDB8fHx3aGl0ZXwxNzY2NjUzOTY0fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Professional nurse avatar 2"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "1. UPDATE THEME: First, modify /app/frontend/src/index.css with the CSS variables provided in the 'colors' section. This is critical to establish the 'Sterile Blue' identity.",
+    "2. INSTALL DEPENDENCIES: Ensure 'lucide-react' is installed for icons. Use 'date-fns' for calendar logic.",
+    "3. COMPONENT LIBRARY: Use the existing Shadcn components in /app/frontend/src/components/ui. Customize them via Tailwind classes if needed, but prefer composition.",
+    "4. BODY MAP: Create a new component 'BodyMap.js' (or .jsx) that renders an SVG. Do not use an external heavy library. A simple SVG with 'path' elements having 'onClick' handlers is sufficient.",
+    "5. DATA-TESTID: Add 'data-testid' to all inputs, buttons, and clickable rows. Format: 'page-section-element' (e.g., 'login-form-submit').",
+    "6. RESPONSIVENESS: The Agenda must be usable on tablet. On mobile, switch to a 'List View' instead of a full calendar grid.",
+    "7. PDF/WORD: For the 'Modulistica' section, mock the download functionality. You can create dummy buttons that trigger a toast notification saying 'Downloading PDF...'.",
+    "8. NAVIGATION: Implement a Sidebar for desktop and a Bottom Nav or Hamburger menu for mobile."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts"
+  ]
+}
