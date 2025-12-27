@@ -657,6 +657,122 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
     </div>
   );
 
+  // Render SIMPLIFIED VIEW (read-only)
+  const renderSimplifiedView = (data) => (
+    <div className="space-y-4">
+      <h1 className="text-lg font-bold text-emerald-700">Scheda Impianto PICC - Semplificata</h1>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-muted-foreground">Data Impianto</Label>
+          <p className="font-medium">{format(new Date(data.data_impianto), "d MMMM yyyy", { locale: it })}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Presidio di Impianto</Label>
+          <p>{data.presidio_impianto || "-"}</p>
+        </div>
+      </div>
+      
+      <div>
+        <Label className="text-muted-foreground">Tipo di Impianto</Label>
+        <p className="font-medium text-lg">{TIPO_CATETERE_OPTIONS.find((t) => t.id === data.tipo_catetere)?.label || data.tipo_catetere || "-"}</p>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-muted-foreground">Braccio</Label>
+          <p>{data.braccio === "dx" ? "Destro" : data.braccio === "sn" ? "Sinistro" : "-"}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Vena</Label>
+          <p>{VENA_OPTIONS.find((v) => v.id === data.vena)?.label || "-"}</p>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-muted-foreground">Tunnelizzazione</Label>
+          <p className={data.tunnelizzazione ? "text-green-600 font-medium" : ""}>
+            {data.tunnelizzazione ? "Sì" : "No"}
+          </p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Exit-site</Label>
+          <p>{data.exit_site_cm ? `${data.exit_site_cm} cm` : "-"}</p>
+        </div>
+      </div>
+      
+      <div>
+        <Label className="text-muted-foreground">Operatore</Label>
+        <p>{data.operatore || "-"}</p>
+      </div>
+    </div>
+  );
+
+  // Render COMPLETE VIEW (read-only)
+  const renderCompleteView = (data) => (
+    <div className="space-y-4">
+      <h1 className="text-lg font-bold text-emerald-700">Scheda Impianto PICC - Completa</h1>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-muted-foreground">Tipo Dispositivo</Label>
+          <p className="font-medium">{TIPO_CATETERE_OPTIONS.find((t) => t.id === data.tipo_catetere)?.label || data.tipo_catetere}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Sede</Label>
+          <p>{data.sede || "-"}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <Label className="text-muted-foreground">Braccio</Label>
+          <p>{data.braccio === "dx" ? "Destro" : data.braccio === "sn" ? "Sinistro" : "-"}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Vena</Label>
+          <p>{VENA_OPTIONS.find((v) => v.id === data.vena)?.label || "-"}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Exit-site</Label>
+          <p>{data.exit_site_cm ? `${data.exit_site_cm} cm` : "-"}</p>
+        </div>
+      </div>
+      <div>
+        <Label className="text-muted-foreground">Caratteristiche</Label>
+        <div className="flex flex-wrap gap-2 mt-1">
+          {data.tunnelizzazione && <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">Tunnelizzato</span>}
+          {data.ecoguidato && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Ecoguidato</span>}
+          {data.precauzioni_barriera && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Precauzioni barriera</span>}
+          {data.sutureless_device && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Sutureless device</span>}
+          {data.medicazione_trasparente && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Medicazione trasparente</span>}
+          {data.controllo_rx && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Controllo RX</span>}
+          {data.controllo_ecg && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Controllo ECG</span>}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label className="text-muted-foreground">Modalità</Label>
+          <p>{MODALITA_OPTIONS.find((m) => m.id === data.modalita)?.label || "-"}</p>
+        </div>
+        <div>
+          <Label className="text-muted-foreground">Motivazione</Label>
+          <p>{MOTIVAZIONE_OPTIONS.find((m) => m.id === data.motivazione)?.label || "-"}</p>
+        </div>
+      </div>
+      <div>
+        <Label className="text-muted-foreground">Operatore</Label>
+        <p>{data.operatore || "-"}</p>
+      </div>
+      {data.note && (
+        <div>
+          <Label className="text-muted-foreground">Note</Label>
+          <p className="whitespace-pre-wrap">{data.note}</p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
