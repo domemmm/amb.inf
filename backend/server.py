@@ -1535,20 +1535,20 @@ def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list,
 
 @api_router.get("/patients/{patient_id}/download/pdf")
 async def download_patient_pdf(patient_id: str, payload: dict = Depends(verify_token)):
-    """Download patient folder as PDF"""
+    """Download patient folder as PDF - NO allegati, NO foto MED"""
     patient = await db.patients.find_one({"id": patient_id}, {"_id": 0})
     if not patient:
         raise HTTPException(status_code=404, detail="Paziente non trovato")
     if patient["ambulatorio"] not in payload["ambulatori"]:
         raise HTTPException(status_code=403, detail="Non hai accesso a questo ambulatorio")
     
-    # Fetch all related data
+    # Fetch all related data (NO photos - allegati si scaricano separatamente)
     schede_med = await db.schede_medicazione_med.find({"patient_id": patient_id}, {"_id": 0}).to_list(1000)
     schede_impianto = await db.schede_impianto_picc.find({"patient_id": patient_id}, {"_id": 0}).to_list(1000)
     schede_gestione = await db.schede_gestione_picc.find({"patient_id": patient_id}, {"_id": 0}).to_list(1000)
-    photos = await db.photos.find({"patient_id": patient_id}, {"_id": 0}).to_list(100)
     
-    pdf_data = generate_patient_pdf(patient, schede_med, schede_impianto, schede_gestione, photos)
+    # NO photos passed - allegati NOT included in cartella paziente
+    pdf_data = generate_patient_pdf(patient, schede_med, schede_impianto, schede_gestione, [])
     
     filename = f"cartella_{patient.get('cognome', 'paziente')}_{patient.get('nome', '')}.pdf"
     
