@@ -1531,34 +1531,6 @@ def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list,
     
     buffer.seek(0)
     return buffer.getvalue()
-                
-                # Determine folder and extension based on file type
-                if file_type == 'image':
-                    folder = "foto"
-                    ext = ".jpg"
-                elif file_type == 'pdf':
-                    folder = "documenti"
-                    ext = ".pdf"
-                elif file_type == 'word':
-                    folder = "documenti"
-                    ext = ".docx" if original_name.endswith('.docx') else ".doc"
-                elif file_type == 'excel':
-                    folder = "documenti"
-                    ext = ".xlsx" if original_name.endswith('.xlsx') else ".xls"
-                else:
-                    folder = "altri"
-                    ext = ""
-                
-                # Create filename
-                if original_name:
-                    filename = f"{folder}/{date_str}_{original_name}"
-                else:
-                    filename = f"{folder}/{date_str}_{tipo}_{idx}{ext}"
-                
-                zf.writestr(filename, file_data)
-    
-    buffer.seek(0)
-    return buffer.getvalue()
 
 
 @api_router.get("/patients/{patient_id}/download/pdf")
