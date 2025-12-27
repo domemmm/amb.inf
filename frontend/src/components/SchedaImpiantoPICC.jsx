@@ -193,12 +193,15 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
 
   const resetForm = () => {
     setFormData({
+      scheda_type: schedaType,
       data_impianto: format(new Date(), "yyyy-MM-dd"),
+      presidio_impianto: "",
       tipo_catetere: "",
-      sede: "",
       braccio: "",
       vena: "",
+      tunnelizzazione: false,
       exit_site_cm: "",
+      sede: "",
       ecoguidato: false,
       igiene_mani: "",
       precauzioni_barriera: false,
@@ -211,7 +214,76 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
       motivazione: "",
       operatore: "",
       note: "",
+      reparto_provenienza: "",
+      diagnosi: "",
+      n_lumi: "",
+      french: "",
+      lunghezza_catetere: "",
+      profondita_inserzione: "",
+      tip_location: "",
+      complicanze: "",
+      data_rimozione: "",
+      motivo_rimozione: "",
     });
+  };
+
+  // Handle print/download PDF
+  const handlePrintScheda = () => {
+    if (!selectedScheda) return;
+    
+    // Create printable content
+    const printContent = document.getElementById('scheda-print-content');
+    if (printContent) {
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Scheda Impianto - ${selectedScheda.data_impianto}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { color: #166534; font-size: 18px; margin-bottom: 10px; }
+              h2 { font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 20px; }
+              .field { margin: 8px 0; }
+              .field-label { font-weight: bold; color: #555; }
+              .field-value { margin-left: 10px; }
+              .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+              .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 5px; }
+              .checked { background: #166534; }
+              @media print { body { margin: 0; } }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!selectedScheda) return;
+    
+    try {
+      toast.info("Generazione PDF in corso...");
+      const response = await apiClient.get(`/schede-impianto-picc/${selectedScheda.id}/pdf`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `scheda_impianto_${selectedScheda.data_impianto}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("PDF scaricato!");
+    } catch (error) {
+      // Fallback to print
+      handlePrintScheda();
+    }
   };
 
   const updateField = (field, value, isEditMode = false) => {
