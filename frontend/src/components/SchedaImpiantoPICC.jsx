@@ -737,12 +737,43 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
           <DialogHeader>
             <DialogTitle>Nuova Scheda Impianto</DialogTitle>
             <DialogDescription>
-              Compila i dati dell'impianto
+              Scegli il tipo di scheda e compila i dati
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[60vh] pr-4">
-            {renderFormFields(formData, false)}
+          {/* Scheda Type Selection */}
+          <div className="border-b pb-4 mb-4">
+            <Label className="mb-3 block">Tipo di Scheda</Label>
+            <RadioGroup 
+              value={schedaType} 
+              onValueChange={(value) => {
+                setSchedaType(value);
+                setFormData(prev => ({ ...prev, scheda_type: value }));
+              }}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary">
+                <RadioGroupItem value="semplificata" id="tipo-semplificata" />
+                <Label htmlFor="tipo-semplificata" className="cursor-pointer">
+                  <span className="font-medium">Semplificata</span>
+                  <p className="text-xs text-muted-foreground">Campi essenziali</p>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary">
+                <RadioGroupItem value="completa" id="tipo-completa" />
+                <Label htmlFor="tipo-completa" className="cursor-pointer">
+                  <span className="font-medium">Completa</span>
+                  <p className="text-xs text-muted-foreground">Tutti i dettagli</p>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <ScrollArea className="max-h-[50vh] pr-4">
+            {schedaType === "semplificata" 
+              ? renderSimplifiedForm(formData, false)
+              : renderFormFields(formData, false)
+            }
           </ScrollArea>
 
           <div className="flex justify-end gap-2 pt-4 border-t">
