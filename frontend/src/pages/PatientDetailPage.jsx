@@ -39,6 +39,11 @@ import {
   FileDown,
   FileArchive,
   X,
+  Paperclip,
+  File,
+  Image,
+  FileSpreadsheet,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
