@@ -374,22 +374,22 @@ export const Layout = () => {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t bg-card flex items-center justify-around px-2 safe-area-bottom">
+      {/* Mobile Bottom Navigation Bar - Larger Icons */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 h-20 border-t bg-card flex items-center justify-around px-2 safe-area-bottom">
         {BOTTOM_NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-colors min-w-0 ${
+              className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-colors min-w-0 ${
                 isActive 
                   ? "text-primary bg-primary/10" 
                   : "text-muted-foreground hover:text-primary hover:bg-primary/5"
               }`}
             >
-              <item.icon className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-medium truncate max-w-full">{item.label}</span>
+              <item.icon className="w-7 h-7 mb-1" />
+              <span className="text-xs font-medium truncate max-w-full">{item.label}</span>
             </NavLink>
           );
         })}
