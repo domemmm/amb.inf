@@ -1160,16 +1160,94 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
                 story.append(Paragraph(f"Note: {scheda.get('note', '-')}", normal_style))
             story.append(Spacer(1, 10))
     
-    # PICC Gestione Schede
+    # PICC Gestione Schede (Monthly Management)
     if schede_gestione:
         story.append(Spacer(1, 20))
-        story.append(Paragraph("Schede Gestione PICC", heading_style))
+        story.append(Paragraph("Schede Gestione PICC (Accessi Venosi)", heading_style))
+        
+        # Define the items to display
+        gestione_items = [
+            ("data_giorno_mese", "Data (giorno/mese)"),
+            ("uso_precauzioni_barriera", "Uso massime precauzioni barriera"),
+            ("lavaggio_mani", "Lavaggio mani"),
+            ("guanti_non_sterili", "Uso guanti non sterili"),
+            ("cambio_guanti_sterili", "Cambio guanti con guanti sterili"),
+            ("rimozione_medicazione_sutureless", "Rimozione medicazione e sostituzione sutureless"),
+            ("rimozione_medicazione_straordinaria", "Rimozione medicazione ord/straordinaria"),
+            ("ispezione_sito", "Ispezione del sito"),
+            ("sito_dolente", "Sito dolente"),
+            ("edema_arrossamento", "Presenza di edema/arrossamento"),
+            ("disinfezione_sito", "Disinfezione del sito"),
+            ("exit_site_cm", "Exit-site cm"),
+            ("fissaggio_sutureless", "Fissaggio catetere con sutureless device"),
+            ("medicazione_trasparente", "Medicazione semipermeabile trasparente"),
+            ("lavaggio_fisiologica", "Lavaggio con fisiologica 10cc/20cc"),
+            ("disinfezione_clorexidina", "Disinfezione Clorexidina 2%"),
+            ("difficolta_aspirazione", "Difficoltà di aspirazione"),
+            ("difficolta_iniezione", "Difficoltà iniezione"),
+            ("medicazione_clorexidina_prolungato", "Medicazione Clorexidina rilascio prol."),
+            ("port_protector", "Utilizzo Port Protector"),
+            ("lock_eparina", "Lock eparina per lavaggi"),
+            ("sostituzione_set", "Sostituzione set infusione"),
+            ("ore_sostituzione_set", "Ore da precedente sostituzione set"),
+            ("febbre", "Febbre"),
+            ("emocoltura", "Prelievo emocoltura"),
+            ("emocoltura_positiva", "Emocoltura positiva per CVC"),
+            ("trasferimento", "Trasferimento altra struttura"),
+            ("rimozione_cvc", "Rimozione CVC"),
+            ("sigla_operatore", "SIGLA OPERATORE"),
+        ]
+        
         for scheda in schede_gestione:
             story.append(Paragraph(f"<b>Mese: {scheda.get('mese', '-')}</b>", normal_style))
             giorni = scheda.get('giorni', {})
+            
             if giorni:
-                story.append(Paragraph(f"Giorni registrati: {len(giorni)}", normal_style))
-            story.append(Spacer(1, 10))
+                # Sort dates
+                sorted_dates = sorted(giorni.keys())
+                num_cols = min(len(sorted_dates), 10)  # Max 10 columns per table for readability
+                
+                # Split into chunks if more than 10 dates
+                for chunk_start in range(0, len(sorted_dates), 10):
+                    chunk_dates = sorted_dates[chunk_start:chunk_start + 10]
+                    
+                    # Build header row
+                    header_row = ["Attività"] + [d.split("-")[-1] for d in chunk_dates]  # Show day number
+                    
+                    # Build data rows
+                    table_data = [header_row]
+                    for item_id, item_label in gestione_items:
+                        row = [item_label]
+                        for date_str in chunk_dates:
+                            val = giorni.get(date_str, {}).get(item_id, "-")
+                            row.append(val if val else "-")
+                        table_data.append(row)
+                    
+                    # Create table
+                    col_widths = [5*cm] + [1.2*cm] * len(chunk_dates)
+                    table = Table(table_data, colWidths=col_widths)
+                    table.setStyle(TableStyle([
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTNAME', (0, 1), (0, -1), 'Helvetica'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 6),
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#166534')),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                        ('TOPPADDING', (0, 0), (-1, -1), 2),
+                        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f0f0')]),
+                    ]))
+                    story.append(table)
+                    story.append(Spacer(1, 10))
+                
+                # Add notes if present
+                if scheda.get('note'):
+                    story.append(Paragraph(f"<b>Note:</b> {scheda.get('note', '')}", normal_style))
+            else:
+                story.append(Paragraph("Nessuna medicazione registrata per questo mese.", normal_style))
+            
+            story.append(Spacer(1, 15))
     
     # Photos info
     if photos:
