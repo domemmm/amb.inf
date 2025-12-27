@@ -155,6 +155,7 @@ export default function PrescrizioniPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [activeTab, setActiveTab] = useState("picc"); // "picc" or "med"
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [formData, setFormData] = useState({
