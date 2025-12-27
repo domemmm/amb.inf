@@ -315,17 +315,20 @@ export default function PrescrizioniPage() {
     }
   };
 
-  // Count by status
-  const getCounts = () => {
+  // Count by status (for current tab)
+  const getCounts = (patientsList) => {
     const counts = { never: 0, active: 0, expiring: 0, expired: 0 };
-    patients.forEach(patient => {
+    patientsList.forEach(patient => {
       const status = getPrescriptionStatus(prescrizioni[patient.id]);
       counts[status.status]++;
     });
     return counts;
   };
 
-  const counts = getCounts();
+  const piccCounts = getCounts(patients.filter(p => p.tipo === "PICC" || p.tipo === "PICC_MED"));
+  const medCounts = getCounts(patients.filter(p => p.tipo === "MED" || p.tipo === "PICC_MED"));
+  const currentCounts = activeTab === "picc" ? piccCounts : medCounts;
+  const currentPatients = activeTab === "picc" ? piccPatients : medPatients;
 
   if (loading) {
     return (
