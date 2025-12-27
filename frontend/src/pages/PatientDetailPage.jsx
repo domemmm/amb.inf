@@ -780,6 +780,9 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
   const [uploading, setUploading] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+  const [fileName, setFileName] = useState("");
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -816,7 +819,7 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
     }
   };
 
-  const handleUpload = async (e, isCamera = false) => {
+  const handleFileSelect = (e, isCamera = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -833,6 +836,18 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
       return;
     }
 
+    // Set pending file and open dialog to ask for name
+    setPendingFile({ file, fileType, isCamera });
+    setFileName(file.name.replace(/\.[^/.]+$/, "")); // Remove extension for default name
+    setUploadDialogOpen(true);
+  };
+
+  const handleUploadConfirm = async () => {
+    if (!pendingFile) return;
+    
+    const { file, fileType } = pendingFile;
+    const finalName = fileName.trim() || file.name;
+    
     const formData = new FormData();
     formData.append("file", file);
     formData.append("patient_id", patientId);
@@ -840,15 +855,18 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
     formData.append("tipo", patientTipo === "MED" ? "MED" : "PICC");
     formData.append("data", format(new Date(), "yyyy-MM-dd"));
     formData.append("file_type", fileType);
-    formData.append("original_name", file.name);
+    formData.append("original_name", finalName + (file.name.match(/\.[^/.]+$/)?.[0] || ""));
 
     setUploading(true);
     try {
       await apiClient.post("/photos", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success(fileType === 'image' ? "Foto caricata" : "Documento caricato");
+      toast.success(fileType === 'image' ? "Foto caricata come allegato PDF" : "Documento caricato");
       onRefresh();
+      setUploadDialogOpen(false);
+      setPendingFile(null);
+      setFileName("");
     } catch (error) {
       toast.error("Errore nel caricamento");
     } finally {
