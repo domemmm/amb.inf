@@ -794,8 +794,19 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
             <div className="flex items-center justify-between">
               <DialogTitle>
                 Scheda del {selectedScheda && format(new Date(selectedScheda.data_impianto), "d MMMM yyyy", { locale: it })}
+                {selectedScheda?.scheda_type === "semplificata" && (
+                  <span className="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">Semplificata</span>
+                )}
               </DialogTitle>
               <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handlePrintScheda}>
+                  <Printer className="w-4 h-4 mr-2" />
+                  Stampa
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+                  <FileDown className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
                 {!isEditing && (
                   <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                     <Edit2 className="w-4 h-4 mr-2" />
@@ -818,67 +829,18 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
           {selectedScheda && (
             <>
               <ScrollArea className="max-h-[60vh] pr-4">
-                {isEditing ? (
-                  renderFormFields(selectedScheda, true)
-                ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-muted-foreground">Tipo Dispositivo</Label>
-                        <p className="font-medium">{TIPO_CATETERE_OPTIONS.find((t) => t.id === selectedScheda.tipo_catetere)?.label || selectedScheda.tipo_catetere}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground">Sede</Label>
-                        <p>{selectedScheda.sede || "-"}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-muted-foreground">Braccio</Label>
-                        <p>{selectedScheda.braccio === "dx" ? "Destro" : selectedScheda.braccio === "sn" ? "Sinistro" : "-"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground">Vena</Label>
-                        <p>{VENA_OPTIONS.find((v) => v.id === selectedScheda.vena)?.label || "-"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground">Exit-site</Label>
-                        <p>{selectedScheda.exit_site_cm ? `${selectedScheda.exit_site_cm} cm` : "-"}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">Caratteristiche</Label>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {selectedScheda.ecoguidato && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Ecoguidato</span>}
-                        {selectedScheda.precauzioni_barriera && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Precauzioni barriera</span>}
-                        {selectedScheda.sutureless_device && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Sutureless device</span>}
-                        {selectedScheda.medicazione_trasparente && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Medicazione trasparente</span>}
-                        {selectedScheda.controllo_rx && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Controllo RX</span>}
-                        {selectedScheda.controllo_ecg && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Controllo ECG</span>}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-muted-foreground">Modalità</Label>
-                        <p>{MODALITA_OPTIONS.find((m) => m.id === selectedScheda.modalita)?.label || "-"}</p>
-                      </div>
-                      <div>
-                        <Label className="text-muted-foreground">Motivazione</Label>
-                        <p>{MOTIVAZIONE_OPTIONS.find((m) => m.id === selectedScheda.motivazione)?.label || "-"}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-muted-foreground">Operatore</Label>
-                      <p>{selectedScheda.operatore || "-"}</p>
-                    </div>
-                    {selectedScheda.note && (
-                      <div>
-                        <Label className="text-muted-foreground">Note</Label>
-                        <p className="whitespace-pre-wrap">{selectedScheda.note}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Printable content wrapper */}
+                <div id="scheda-print-content">
+                  {isEditing ? (
+                    selectedScheda.scheda_type === "semplificata" 
+                      ? renderSimplifiedForm(selectedScheda, true)
+                      : renderFormFields(selectedScheda, true)
+                  ) : (
+                    selectedScheda.scheda_type === "semplificata" 
+                      ? renderSimplifiedView(selectedScheda)
+                      : renderCompleteView(selectedScheda)
+                  )}
+                </div>
               </ScrollArea>
 
               {isEditing && (
