@@ -368,8 +368,8 @@ export const Layout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="lg:pl-64 pt-14 lg:pt-16 pb-20 lg:pb-0">
-        <div className="p-4 lg:p-6 min-h-[calc(100vh-3.5rem-5rem)] lg:min-h-[calc(100vh-4rem)]">
+      <main className="lg:pl-64 pt-16 lg:pt-16 pb-24 lg:pb-0">
+        <div className="p-4 lg:p-6 min-h-[calc(100vh-4rem-6rem)] lg:min-h-[calc(100vh-4rem)]">
           <Outlet />
         </div>
       </main>
