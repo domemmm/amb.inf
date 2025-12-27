@@ -130,6 +130,52 @@ export default function PatientDetailPage() {
     }
   }, [patientId, navigate]);
 
+  // Download patient folder as PDF
+  const handleDownloadPDF = async () => {
+    try {
+      toast.info("Generazione PDF in corso...");
+      const response = await apiClient.get(`/patients/${patientId}/download/pdf`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `cartella_${patient?.cognome}_${patient?.nome}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("PDF scaricato con successo!");
+    } catch (error) {
+      toast.error("Errore nel download del PDF");
+      console.error(error);
+    }
+  };
+
+  // Download patient folder as ZIP
+  const handleDownloadZIP = async () => {
+    try {
+      toast.info("Generazione ZIP in corso...");
+      const response = await apiClient.get(`/patients/${patientId}/download/zip`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], { type: 'application/zip' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `cartella_${patient?.cognome}_${patient?.nome}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("ZIP scaricato con successo!");
+    } catch (error) {
+      toast.error("Errore nel download dello ZIP");
+      console.error(error);
+    }
+  };
+
   const fetchMedicalRecords = useCallback(async () => {
     if (!patient) return;
 
