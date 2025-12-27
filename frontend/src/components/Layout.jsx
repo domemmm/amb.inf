@@ -66,9 +66,9 @@ export const Layout = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [orientation, setOrientation] = useState("auto");
   const [textZoom, setTextZoom] = useState(() => {
-    // Load saved zoom level from localStorage
+    // Load saved zoom level from localStorage, default to 150%
     const saved = localStorage.getItem("textZoom");
-    return saved ? parseInt(saved, 10) : 100;
+    return saved ? parseInt(saved, 10) : 150;
   });
 
   useEffect(() => {
