@@ -785,6 +785,7 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [photoRotation, setPhotoRotation] = useState(0);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
