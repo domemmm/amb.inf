@@ -1180,23 +1180,45 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
         </div>
       )}
 
-      {/* Photo Detail Dialog with rotation */}
+      {/* Photo Detail Dialog with rotation and zoom */}
       <Dialog open={!!selectedPhoto} onOpenChange={() => {
         setSelectedPhoto(null);
         setPhotoRotation(0);
+        setPhotoZoom(1);
       }}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[95vh]">
           <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle>
+            <DialogTitle className="truncate max-w-md">
               {selectedPhoto?.original_name || "Foto"} - {selectedPhoto && format(new Date(selectedPhoto.data), "d MMMM yyyy", { locale: it })}
             </DialogTitle>
-            <div className="flex gap-2">
+            <div className="flex gap-1">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setPhotoZoom(prev => Math.max(0.25, prev - 0.25))}
+                className="h-8 w-8"
+                title="Riduci"
+                disabled={photoZoom <= 0.25}
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <span className="flex items-center justify-center w-12 text-xs">{Math.round(photoZoom * 100)}%</span>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => setPhotoZoom(prev => Math.min(3, prev + 0.25))}
+                className="h-8 w-8"
+                title="Ingrandisci"
+                disabled={photoZoom >= 3}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
               <Button 
                 variant="outline" 
                 size="icon" 
                 onClick={() => setPhotoRotation(prev => (prev + 90) % 360)}
                 className="h-8 w-8"
-                title="Ruota foto"
+                title="Ruota 90°"
               >
                 <RotateCw className="h-4 w-4" />
               </Button>
@@ -1206,6 +1228,7 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
                 onClick={() => {
                   setSelectedPhoto(null);
                   setPhotoRotation(0);
+                  setPhotoZoom(1);
                 }}
                 className="h-8 w-8 rounded-full hover:bg-destructive/10"
               >
@@ -1215,32 +1238,65 @@ function AllegatiGallery({ patientId, ambulatorio, patientTipo, photos, onRefres
           </DialogHeader>
           {selectedPhoto && (
             <div className="relative flex flex-col items-center">
-              <div className="overflow-hidden rounded-lg max-h-[60vh]">
+              <div 
+                className="overflow-auto rounded-lg border bg-muted/30" 
+                style={{ maxHeight: '60vh', maxWidth: '100%' }}
+              >
                 <img
                   src={`data:image/jpeg;base64,${selectedPhoto.image_data}`}
                   alt="Foto ingrandita"
-                  className="max-w-full max-h-[60vh] object-contain transition-transform duration-300"
-                  style={{ transform: `rotate(${photoRotation}deg)` }}
+                  className="transition-transform duration-200"
+                  style={{ 
+                    transform: `rotate(${photoRotation}deg) scale(${photoZoom})`,
+                    transformOrigin: 'center center',
+                    imageRendering: photoZoom > 1 ? 'auto' : 'auto',
+                  }}
                 />
               </div>
-              <div className="flex gap-2 mt-4 w-full">
+              <div className="flex gap-2 mt-4 w-full flex-wrap justify-center">
                 <Button 
                   variant="outline" 
-                  onClick={() => setPhotoRotation(prev => (prev + 90) % 360)}
-                  className="flex-1"
+                  size="sm"
+                  onClick={() => setPhotoZoom(prev => Math.max(0.25, prev - 0.25))}
+                  disabled={photoZoom <= 0.25}
                 >
-                  <RotateCw className="h-4 w-4 mr-2" />
-                  Ruota 90°
+                  <ZoomOut className="h-4 w-4 mr-1" />
+                  Riduci
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPhotoZoom(1)}
+                >
+                  100%
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPhotoZoom(prev => Math.min(3, prev + 0.25))}
+                  disabled={photoZoom >= 3}
+                >
+                  <ZoomIn className="h-4 w-4 mr-1" />
+                  Ingrandisci
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setPhotoRotation(prev => (prev + 90) % 360)}
+                >
+                  <RotateCw className="h-4 w-4 mr-1" />
+                  Ruota
                 </Button>
                 <Button 
                   variant="secondary" 
+                  size="sm"
                   onClick={() => {
                     setSelectedPhoto(null);
                     setPhotoRotation(0);
+                    setPhotoZoom(1);
                   }}
-                  className="flex-1"
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="h-4 w-4 mr-1" />
                   Chiudi
                 </Button>
               </div>
