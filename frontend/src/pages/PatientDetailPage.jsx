@@ -347,7 +347,28 @@ export default function PatientDetailPage() {
           <p className="text-sm text-muted-foreground">Cartella Clinica</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {/* Download Buttons */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" data-testid="download-folder-btn">
+                <Download className="w-4 h-4 mr-2" />
+                Scarica Cartella
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleDownloadPDF} data-testid="download-pdf-btn">
+                <FileDown className="w-4 h-4 mr-2 text-red-500" />
+                Scarica PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownloadZIP} data-testid="download-zip-btn">
+                <FileArchive className="w-4 h-4 mr-2 text-amber-500" />
+                Scarica ZIP (con foto)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           {/* Show "Riprendi in Cura" for dimesso/sospeso patients */}
           {(patient.status === "dimesso" || patient.status === "sospeso") && (
             <Button
