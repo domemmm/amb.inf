@@ -73,51 +73,20 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
   const [selectedScheda, setSelectedScheda] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [schedaType, setSchedaType] = useState("semplificata"); // "semplificata" or "completa"
-  const printRef = useRef(null);
   const [formData, setFormData] = useState({
-    scheda_type: "semplificata", // Track which type of scheda
+    scheda_type: "semplificata",
     data_impianto: format(new Date(), "yyyy-MM-dd"),
-    // Common fields for both versions
     presidio_impianto: "",
     tipo_catetere: "",
     braccio: "",
     vena: "",
     tunnelizzazione: false,
+    tunnelizzazione_note: "", // Max 6 caratteri
     exit_site_cm: "",
-    // Complete version additional fields
-    sede: "",
-    ecoguidato: false,
-    igiene_mani: "",
-    precauzioni_barriera: false,
-    disinfettante: "",
-    sutureless_device: false,
-    medicazione_trasparente: false,
-    controllo_rx: false,
-    controllo_ecg: false,
-    modalita: "",
-    motivazione: "",
     operatore: "",
-    note: "",
-    // Additional fields for complete version
-    reparto_provenienza: "",
-    diagnosi: "",
-    n_lumi: "",
-    french: "",
-    lunghezza_catetere: "",
-    profondita_inserzione: "",
-    tip_location: "",
-    complicanze: "",
-    data_rimozione: "",
-    motivo_rimozione: "",
   });
 
   const handleCreate = async () => {
-    if (!formData.tipo_catetere || !formData.sede) {
-      toast.error("Compila i campi obbligatori");
-      return;
-    }
-
     setSaving(true);
     try {
       await apiClient.post("/schede-impianto-picc", {
