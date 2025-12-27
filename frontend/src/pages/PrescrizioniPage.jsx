@@ -26,7 +26,10 @@ import {
   Clock,
   XCircle,
   Circle,
+  Stethoscope,
+  Activity,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format, differenceInDays, addMonths, parseISO } from "date-fns";
 import { it } from "date-fns/locale";
