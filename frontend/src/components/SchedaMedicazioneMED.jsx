@@ -599,6 +599,55 @@ export const SchedaMedicazioneMED = ({ patientId, ambulatorio, schede, onRefresh
           />
         </div>
       </div>
+
+      {/* Photos Section */}
+      <div className="form-section">
+        <div className="form-section-title flex items-center gap-2">
+          <Camera className="w-4 h-4" />
+          Foto Lesione
+        </div>
+        <div className="space-y-3">
+          {/* Upload buttons */}
+          <div className="flex gap-2">
+            <label>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => handlePhotoUpload(e, isEditMode ? selectedScheda?.id : null)}
+                disabled={uploadingPhoto}
+              />
+              <Button asChild variant="outline" size="sm" disabled={uploadingPhoto}>
+                <span>
+                  <Camera className="w-4 h-4 mr-2" />
+                  Scatta Foto
+                </span>
+              </Button>
+            </label>
+            <label>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handlePhotoUpload(e, isEditMode ? selectedScheda?.id : null)}
+                disabled={uploadingPhoto}
+              />
+              <Button asChild variant="outline" size="sm" disabled={uploadingPhoto}>
+                <span>
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploadingPhoto ? "Caricamento..." : "Carica da Galleria"}
+                </span>
+              </Button>
+            </label>
+          </div>
+          
+          {/* Photo preview - placeholder for now */}
+          <p className="text-xs text-muted-foreground">
+            Le foto caricate saranno visibili nella sezione Allegati del paziente e incluse nel PDF della scheda.
+          </p>
+        </div>
+      </div>
     </div>
   );
 
