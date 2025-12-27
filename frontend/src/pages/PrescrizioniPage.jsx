@@ -204,7 +204,43 @@ export default function PrescrizioniPage() {
     fetchData();
   }, [fetchData]);
 
-  // Filter patients
+  // Filter patients by type (PICC or MED) and other filters
+  const getFilteredPatientsByType = (type) => {
+    return patients.filter(patient => {
+      // Filter by type
+      if (type === "picc") {
+        if (patient.tipo !== "PICC" && patient.tipo !== "PICC_MED") return false;
+      } else if (type === "med") {
+        if (patient.tipo !== "MED" && patient.tipo !== "PICC_MED") return false;
+      }
+
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        if (!patient.nome?.toLowerCase().includes(query) && 
+            !patient.cognome?.toLowerCase().includes(query) &&
+            !patient.codice_fiscale?.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+      
+      // Status filter
+      if (filterStatus !== "all") {
+        const prescrizione = prescrizioni[patient.id];
+        const status = getPrescriptionStatus(prescrizione);
+        if (status.status !== filterStatus) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  };
+
+  const piccPatients = getFilteredPatientsByType("picc");
+  const medPatients = getFilteredPatientsByType("med");
+
+  // Filter patients (legacy - for counts)
   const filteredPatients = patients.filter(patient => {
     // Search filter
     if (searchQuery) {
