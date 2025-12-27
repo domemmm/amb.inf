@@ -350,6 +350,20 @@ export default function PrescrizioniPage() {
         </div>
       </div>
 
+      {/* Tabs for PICC and MED */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="picc" className="gap-2">
+            <Activity className="w-4 h-4" />
+            PICC ({patients.filter(p => p.tipo === "PICC" || p.tipo === "PICC_MED").length})
+          </TabsTrigger>
+          <TabsTrigger value="med" className="gap-2">
+            <Stethoscope className="w-4 h-4" />
+            MED ({patients.filter(p => p.tipo === "MED" || p.tipo === "PICC_MED").length})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       {/* Status Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <Card 
@@ -360,7 +374,7 @@ export default function PrescrizioniPage() {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-gray-300" />
               <div>
-                <div className="text-2xl font-bold">{counts.never}</div>
+                <div className="text-2xl font-bold">{currentCounts.never}</div>
                 <p className="text-xs text-muted-foreground">Mai fatta</p>
               </div>
             </div>
@@ -375,7 +389,7 @@ export default function PrescrizioniPage() {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-green-500" />
               <div>
-                <div className="text-2xl font-bold text-green-600">{counts.active}</div>
+                <div className="text-2xl font-bold text-green-600">{currentCounts.active}</div>
                 <p className="text-xs text-muted-foreground">In corso</p>
               </div>
             </div>
@@ -390,7 +404,7 @@ export default function PrescrizioniPage() {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-yellow-500" />
               <div>
-                <div className="text-2xl font-bold text-yellow-600">{counts.expiring}</div>
+                <div className="text-2xl font-bold text-yellow-600">{currentCounts.expiring}</div>
                 <p className="text-xs text-muted-foreground">In scadenza</p>
               </div>
             </div>
@@ -405,7 +419,7 @@ export default function PrescrizioniPage() {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-red-500" />
               <div>
-                <div className="text-2xl font-bold text-red-600">{counts.expired}</div>
+                <div className="text-2xl font-bold text-red-600">{currentCounts.expired}</div>
                 <p className="text-xs text-muted-foreground">Scadute</p>
               </div>
             </div>
