@@ -1332,11 +1332,11 @@ def generate_patient_pdf(patient: dict, schede_med: list, schede_impianto: list,
 
 
 def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list, schede_gestione: list, photos: list) -> bytes:
-    """Generate a ZIP with all patient data including photos"""
+    """Generate a ZIP with all patient data including photos and documents"""
     buffer = io.BytesIO()
     
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
-        # Add PDF summary
+        # Add PDF summary (contains all data including photos as images)
         pdf_data = generate_patient_pdf(patient, schede_med, schede_impianto, schede_gestione, photos)
         zf.writestr(f"cartella_clinica_{patient.get('cognome', 'paziente')}_{patient.get('nome', '')}.pdf", pdf_data)
         
@@ -1360,12 +1360,39 @@ def generate_patient_zip(patient: dict, schede_med: list, schede_impianto: list,
             gestione_json = json.dumps(schede_gestione, indent=2, ensure_ascii=False)
             zf.writestr("schede_gestione_picc.json", gestione_json)
         
-        # Add photos
+        # Add files by type
         if photos:
             for idx, photo in enumerate(photos, 1):
-                image_data = base64.b64decode(photo.get('image_data', ''))
-                filename = f"foto/{photo.get('data', 'unknown')}_{photo.get('tipo', 'foto')}_{idx}.jpg"
-                zf.writestr(filename, image_data)
+                file_data = base64.b64decode(photo.get('image_data', ''))
+                file_type = photo.get('file_type', 'image')
+                original_name = photo.get('original_name', '')
+                date_str = photo.get('data', 'unknown')
+                tipo = photo.get('tipo', 'allegato')
+                
+                # Determine folder and extension based on file type
+                if file_type == 'image':
+                    folder = "foto"
+                    ext = ".jpg"
+                elif file_type == 'pdf':
+                    folder = "documenti"
+                    ext = ".pdf"
+                elif file_type == 'word':
+                    folder = "documenti"
+                    ext = ".docx" if original_name.endswith('.docx') else ".doc"
+                elif file_type == 'excel':
+                    folder = "documenti"
+                    ext = ".xlsx" if original_name.endswith('.xlsx') else ".xls"
+                else:
+                    folder = "altri"
+                    ext = ""
+                
+                # Create filename
+                if original_name:
+                    filename = f"{folder}/{date_str}_{original_name}"
+                else:
+                    filename = f"{folder}/{date_str}_{tipo}_{idx}{ext}"
+                
+                zf.writestr(filename, file_data)
     
     buffer.seek(0)
     return buffer.getvalue()
