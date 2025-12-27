@@ -703,60 +703,68 @@ async def download_scheda_impianto_pdf(scheda_id: str, payload: dict = Depends(v
     )
 
 def generate_scheda_impianto_pdf(scheda: dict, patient: dict) -> bytes:
-    """Generate official format PDF for Scheda Impianto PICC"""
+    """Generate PDF for Scheda Impianto PICC - EXACT format as per official form"""
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1*cm, bottomMargin=1*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.8*cm, bottomMargin=0.8*cm, leftMargin=1*cm, rightMargin=1*cm)
     story = []
     
     # Styles
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=14, spaceAfter=10, alignment=1, textColor=colors.HexColor('#166534'))
-    section_style = ParagraphStyle('Section', parent=styles['Heading2'], fontSize=11, spaceBefore=12, spaceAfter=6, textColor=colors.white, backColor=colors.HexColor('#166534'), leftIndent=5, rightIndent=5)
-    normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=9, spaceAfter=3)
-    bold_style = ParagraphStyle('Bold', parent=styles['Normal'], fontSize=9, spaceAfter=3, fontName='Helvetica-Bold')
-    checkbox_style = ParagraphStyle('Checkbox', parent=styles['Normal'], fontSize=8, spaceAfter=2)
+    title_style = ParagraphStyle('Title', fontSize=12, alignment=1, fontName='Helvetica-Bold', spaceAfter=5)
+    section_header = ParagraphStyle('SectionHeader', fontSize=10, fontName='Helvetica-Bold', textColor=colors.white, 
+                                    backColor=colors.HexColor('#4a5568'), leftIndent=3, rightIndent=3, spaceBefore=8, spaceAfter=4)
+    normal_style = ParagraphStyle('Normal', fontSize=8, spaceAfter=2, fontName='Helvetica')
+    small_style = ParagraphStyle('Small', fontSize=7, spaceAfter=1, fontName='Helvetica')
+    italic_small = ParagraphStyle('ItalicSmall', fontSize=6, fontName='Helvetica-Oblique', textColor=colors.grey)
     
-    def checkbox(checked=False):
-        return "☑" if checked else "☐"
+    def cb(checked):
+        """Checkbox helper - filled or empty"""
+        return "■" if checked else "□"
     
-    # Header
+    def get_val(key, default=""):
+        """Get value from scheda, return empty string if None"""
+        val = scheda.get(key)
+        return val if val else default
+    
+    # === HEADER ===
     story.append(Paragraph("SCHEDA IMPIANTO e GESTIONE ACCESSI VENOSI", title_style))
-    story.append(Paragraph("Allegato n. 2", ParagraphStyle('Right', parent=normal_style, alignment=2)))
-    story.append(Spacer(1, 10))
+    story.append(Paragraph("Allegato n. 2", ParagraphStyle('Right', fontSize=8, alignment=2)))
+    story.append(Spacer(1, 8))
     
-    # Patient Info Header
-    patient_name = f"{patient.get('cognome', '')} {patient.get('nome', '')}" if patient else "-"
-    patient_cf = patient.get('codice_fiscale', '-') if patient else "-"
-    patient_dob = patient.get('data_nascita', '-') if patient else "-"
+    # Patient Info Box
+    patient_name = f"{patient.get('cognome', '')} {patient.get('nome', '')}" if patient else ""
+    patient_cf = patient.get('codice_fiscale', '') if patient else ""
+    patient_dob = patient.get('data_nascita', '') if patient else ""
+    patient_sex = patient.get('sesso', '') if patient else ""
     
     header_data = [
-        ["Presidio Ospedaliero/Struttura:", scheda.get('presidio_impianto', '-'), "Cognome e Nome:", patient_name],
+        ["Presidio Ospedaliero/Struttura:", get_val('presidio_impianto'), "Cognome e Nome:", patient_name],
         ["Codice Fiscale:", patient_cf, "Data di nascita:", patient_dob],
-        ["Sesso:", f"{checkbox(patient.get('sesso') == 'M')} M  {checkbox(patient.get('sesso') == 'F')} F" if patient else "☐ M  ☐ F", "Preso in carico dal:", scheda.get('data_impianto', '-')],
+        ["Sesso:", f"{cb(patient_sex == 'M')} M   {cb(patient_sex == 'F')} F", "Preso in carico dal:", get_val('data_impianto')],
     ]
-    header_table = Table(header_data, colWidths=[4*cm, 5*cm, 4*cm, 5*cm])
-    header_table.setStyle(TableStyle([
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
+    t = Table(header_data, colWidths=[4*cm, 5.5*cm, 3.5*cm, 5.5*cm])
+    t.setStyle(TableStyle([
+        ('FONTSIZE', (0, 0), (-1, -1), 7),
         ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
         ('FONTNAME', (2, 0), (2, -1), 'Helvetica-Bold'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0f0f0')),
-        ('BACKGROUND', (2, 0), (2, -1), colors.HexColor('#f0f0f0')),
+        ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e2e8f0')),
+        ('BACKGROUND', (2, 0), (2, -1), colors.HexColor('#e2e8f0')),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
     ]))
-    story.append(header_table)
-    story.append(Spacer(1, 15))
+    story.append(t)
+    story.append(Spacer(1, 10))
     
-    # SECTION 1: CATETERE GIA' PRESENTE
-    story.append(Paragraph("1. SEZIONE CATETERE GIA' PRESENTE", section_style))
-    story.append(Paragraph("<i>(Da compilare se catetere già presente al momento della presa in carico)</i>", 
-                          ParagraphStyle('Italic', parent=normal_style, fontSize=7, textColor=colors.grey)))
-    story.append(Spacer(1, 5))
+    # === SECTION 1: CATETERE GIÀ PRESENTE ===
+    story.append(Paragraph("1. SEZIONE CATETERE GIA' PRESENTE", section_header))
+    story.append(Paragraph("(Da compilare se catetere già presente al momento della presa in carico)", italic_small))
+    story.append(Spacer(1, 4))
     
-    tipo_catetere = scheda.get('tipo_catetere', '')
-    tipo_options = [
+    tipo = get_val('tipo_catetere')
+    tipo_opts = [
         ("cvd_non_tunnellizzato", "CVC non tunnellizzato (breve termine)"),
         ("cvd_tunnellizzato", "CVC tunnellizzato (lungo termine tipo Groshong, Hickman, Broviac)"),
         ("picc", "CVC medio termine (PICC)"),
@@ -764,90 +772,138 @@ def generate_scheda_impianto_pdf(scheda: dict, patient: dict) -> bytes:
         ("midline", "Midline"),
     ]
     
-    story.append(Paragraph("<b>Tipo di Catetere:</b>", bold_style))
-    for opt_id, opt_label in tipo_options:
-        story.append(Paragraph(f"  {checkbox(tipo_catetere == opt_id)} {opt_label}", checkbox_style))
+    story.append(Paragraph("<b>Tipo di Catetere:</b>", normal_style))
+    for opt_id, opt_label in tipo_opts:
+        story.append(Paragraph(f"    {cb(tipo == opt_id)} {opt_label}", small_style))
     
-    story.append(Spacer(1, 8))
-    story.append(Paragraph(f"<b>Struttura/reparto dove il catetere è stato inserito:</b> {scheda.get('reparto_provenienza', '_'*40)}", normal_style))
-    story.append(Paragraph(f"<b>Controllo RX Post-Inserimento:</b> {checkbox(scheda.get('controllo_rx'))} SI  {checkbox(not scheda.get('controllo_rx'))} NO", normal_style))
-    
-    story.append(Spacer(1, 15))
-    
-    # SECTION 2: SEZIONE IMPIANTO CATETERE
-    story.append(Paragraph("2. SEZIONE IMPIANTO CATETERE", section_style))
-    story.append(Paragraph("<i>(Da compilare se catetere viene impiantato nella struttura)</i>", 
-                          ParagraphStyle('Italic', parent=normal_style, fontSize=7, textColor=colors.grey)))
-    story.append(Spacer(1, 5))
-    
-    story.append(Paragraph("<b>TIPO DI CATETERE:</b>", bold_style))
-    for opt_id, opt_label in tipo_options:
-        story.append(Paragraph(f"  {checkbox(tipo_catetere == opt_id)} {opt_label}", checkbox_style))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph(f"<b>Struttura/reparto dove il catetere è stato inserito:</b> {get_val('reparto_provenienza')}", small_style))
+    story.append(Paragraph(f"<b>Controllo RX Post-Inserimento effettuato:</b>  {cb(get_val('controllo_rx_precedente'))} SI   {cb(not get_val('controllo_rx_precedente'))} NO", small_style))
     
     story.append(Spacer(1, 8))
     
-    # Posizionamento CVC
-    story.append(Paragraph("<b>POSIZIONAMENTO CVC:</b>", bold_style))
-    cvc_positions = [
-        ("succlavia_dx", "succlavia dx"),
-        ("succlavia_sn", "succlavia sn"),
-        ("giugulare_dx", "giugulare interna dx"),
-        ("giugulare_sn", "giugulare interna sn"),
-    ]
-    pos_text = "  ".join([f"{checkbox(scheda.get('sede') == opt_id)} {opt_label}" for opt_id, opt_label in cvc_positions])
-    story.append(Paragraph(f"  {pos_text}", checkbox_style))
-    story.append(Paragraph(f"  {checkbox(scheda.get('sede') not in [p[0] for p in cvc_positions])} altro specificare: {scheda.get('sede', '_'*20)}", checkbox_style))
+    # === SECTION 2: IMPIANTO CATETERE ===
+    story.append(Paragraph("2. SEZIONE IMPIANTO CATETERE", section_header))
+    story.append(Paragraph("(Da compilare se catetere viene impiantato nella struttura)", italic_small))
+    story.append(Spacer(1, 4))
     
-    story.append(Spacer(1, 8))
+    # TIPO DI CATETERE
+    story.append(Paragraph("<b>TIPO DI CATETERE:</b>", normal_style))
+    for opt_id, opt_label in tipo_opts:
+        story.append(Paragraph(f"    {cb(tipo == opt_id)} {opt_label}", small_style))
     
-    # Posizionamento PICC
-    story.append(Paragraph("<b>POSIZIONAMENTO PICC:</b>", bold_style))
-    braccio = scheda.get('braccio', '')
-    story.append(Paragraph(f"  {checkbox(braccio == 'dx')} braccio dx  {checkbox(braccio == 'sn')} braccio sn", checkbox_style))
+    story.append(Spacer(1, 4))
     
-    vena = scheda.get('vena', '')
-    story.append(Paragraph(f"  <b>Vena:</b> {checkbox(vena == 'basilica')} Basilica  {checkbox(vena == 'cefalica')} Cefalica  {checkbox(vena == 'brachiale')} Vena brachiale", checkbox_style))
-    story.append(Paragraph(f"  <b>Exit-site cm:</b> {scheda.get('exit_site_cm', '_'*10)}", checkbox_style))
-    story.append(Paragraph(f"  <b>Tunnelizzazione:</b> {checkbox(scheda.get('tunnelizzazione'))} SI  {checkbox(not scheda.get('tunnelizzazione'))} NO", checkbox_style))
+    # POSIZIONAMENTO CVC
+    story.append(Paragraph("<b>POSIZIONAMENTO CVC:</b>", normal_style))
+    sede = get_val('sede')
+    cvc_pos = [("succlavia_dx", "succlavia dx"), ("succlavia_sn", "succlavia sn"), 
+               ("giugulare_dx", "giugulare interna dx"), ("giugulare_sn", "giugulare interna sn")]
+    pos_line = "    " + "  ".join([f"{cb(sede == p[0])} {p[1]}" for p in cvc_pos])
+    story.append(Paragraph(pos_line, small_style))
+    story.append(Paragraph(f"    {cb(sede and sede not in [p[0] for p in cvc_pos])} altro specificare: {sede if sede and sede not in [p[0] for p in cvc_pos] else ''}", small_style))
     
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 4))
     
-    # Procedure details
-    story.append(Paragraph(f"<b>VALUTAZIONE MIGLIOR SITO DI INSERIMENTO:</b> {checkbox(scheda.get('valutazione_sito'))} SI  {checkbox(not scheda.get('valutazione_sito'))} NO", normal_style))
-    story.append(Paragraph(f"<b>IMPIANTO ECOGUIDATO:</b> {checkbox(scheda.get('ecoguidato'))} SI  {checkbox(not scheda.get('ecoguidato'))} NO", normal_style))
-    story.append(Paragraph(f"<b>IGIENE DELLE MANI (lavaggio antisettico o frizione alcolica):</b> {checkbox(scheda.get('igiene_mani'))} SI  {checkbox(not scheda.get('igiene_mani'))} NO", normal_style))
-    story.append(Paragraph(f"<b>UTILIZZO MASSIME PRECAUZIONI DI BARRIERA:</b> {checkbox(scheda.get('precauzioni_barriera'))} SI  {checkbox(not scheda.get('precauzioni_barriera'))} NO", normal_style))
-    story.append(Paragraph("<i>(berretto, maschera, camice sterile, guanti sterili, telo sterile)</i>", 
-                          ParagraphStyle('Italic', parent=normal_style, fontSize=7, textColor=colors.grey)))
+    # POSIZIONAMENTO PICC
+    story.append(Paragraph("<b>POSIZIONAMENTO PICC:</b>", normal_style))
+    braccio = get_val('braccio')
+    story.append(Paragraph(f"    {cb(braccio == 'dx')} braccio dx    {cb(braccio == 'sn')} braccio sn", small_style))
     
-    disinfettante = scheda.get('disinfettante', '')
-    story.append(Paragraph(f"<b>DISINFEZIONE DELLA CUTE INTEGRA:</b>", normal_style))
-    story.append(Paragraph(f"  {checkbox(disinfettante == 'clorexidina_2')} CLOREXIDINA IN SOLUZIONE ALCOLICA 2%  {checkbox(disinfettante == 'iodiopovidone')} IODIOPOVIDONE", checkbox_style))
+    vena = get_val('vena')
+    story.append(Paragraph(f"    <b>Vena:</b>  {cb(vena == 'basilica')} Basilica   {cb(vena == 'cefalica')} Cefalica   {cb(vena == 'brachiale')} Vena brachiale", small_style))
+    story.append(Paragraph(f"    <b>Exit-site cm:</b> {get_val('exit_site_cm')}", small_style))
     
-    story.append(Paragraph(f"<b>IMPIEGO DI 'SUTURELESS DEVICES':</b> {checkbox(scheda.get('sutureless_device'))} SI  {checkbox(not scheda.get('sutureless_device'))} NO", normal_style))
-    story.append(Paragraph(f"<b>IMPIEGO DI MEDICAZIONE SEMIPERMEABILE TRASPARENTE:</b> {checkbox(scheda.get('medicazione_trasparente'))} SI  {checkbox(not scheda.get('medicazione_trasparente'))} NO", normal_style))
-    story.append(Paragraph(f"<b>IMPIEGO DI MEDICAZIONE OCCLUSIVA:</b> {checkbox(scheda.get('medicazione_occlusiva'))} SI  {checkbox(not scheda.get('medicazione_occlusiva'))} NO", normal_style))
-    story.append(Paragraph(f"<b>CONTROLLO RX POST-INSERIMENTO:</b> {checkbox(scheda.get('controllo_rx'))} SI  {checkbox(not scheda.get('controllo_rx'))} NO", normal_style))
-    story.append(Paragraph(f"<b>CONTROLLO ECG POST-INSERIMENTO:</b> {checkbox(scheda.get('controllo_ecg'))} SI  {checkbox(not scheda.get('controllo_ecg'))} NO", normal_style))
+    tunn = get_val('tunnelizzazione')
+    story.append(Paragraph(f"    <b>Tunnelizzazione:</b>  {cb(tunn)} SI   {cb(not tunn)} NO", small_style))
     
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 4))
     
-    # Modalità
-    modalita = scheda.get('modalita', '')
-    story.append(Paragraph(f"<b>MODALITÀ:</b> {checkbox(modalita == 'emergenza')} EMERGENZA - URGENZA  {checkbox(modalita == 'elezione')} ELEZIONE", normal_style))
+    # PROCEDURE DETAILS
+    val_sito = get_val('valutazione_sito')
+    story.append(Paragraph(f"<b>VALUTAZIONE MIGLIOR SITO DI INSERIMENTO:</b>  {cb(val_sito)} SI   {cb(not val_sito)} NO", normal_style))
     
-    # Motivazione
-    motivazione = scheda.get('motivazione', '')
+    eco = get_val('ecoguidato')
+    story.append(Paragraph(f"<b>IMPIANTO ECOGUIDATO:</b>  {cb(eco)} SI   {cb(not eco)} NO", normal_style))
+    
+    igiene = get_val('igiene_mani')
+    story.append(Paragraph(f"<b>IGIENE DELLE MANI (lavaggio antisettico o frizione alcolica):</b>  {cb(igiene)} SI   {cb(not igiene)} NO", normal_style))
+    
+    prec = get_val('precauzioni_barriera')
+    story.append(Paragraph(f"<b>UTILIZZO MASSIME PRECAUZIONI DI BARRIERA:</b>  {cb(prec)} SI   {cb(not prec)} NO", normal_style))
+    story.append(Paragraph("    (berretto, maschera, camice sterile, guanti sterili, telo sterile)", italic_small))
+    
+    story.append(Spacer(1, 3))
+    
+    # DISINFEZIONE
+    dis = get_val('disinfettante')
+    story.append(Paragraph("<b>DISINFEZIONE DELLA CUTE INTEGRA:</b>", normal_style))
+    story.append(Paragraph(f"    {cb(dis == 'clorexidina_2')} CLOREXIDINA IN SOLUZIONE ALCOLICA 2%    {cb(dis == 'iodiopovidone')} IODIOPOVIDONE", small_style))
+    
+    story.append(Spacer(1, 3))
+    
+    # ALTRI DETTAGLI
+    sut = get_val('sutureless_device')
+    story.append(Paragraph(f"<b>IMPIEGO DI 'SUTURELESS DEVICES':</b>  {cb(sut)} SI   {cb(not sut)} NO", normal_style))
+    
+    med_trasp = get_val('medicazione_trasparente')
+    story.append(Paragraph(f"<b>IMPIEGO DI MEDICAZIONE SEMIPERMEABILE TRASPARENTE:</b>  {cb(med_trasp)} SI   {cb(not med_trasp)} NO", normal_style))
+    
+    med_occl = get_val('medicazione_occlusiva')
+    story.append(Paragraph(f"<b>IMPIEGO DI MEDICAZIONE OCCLUSIVA:</b>  {cb(med_occl)} SI   {cb(not med_occl)} NO", normal_style))
+    
+    rx_post = get_val('controllo_rx')
+    story.append(Paragraph(f"<b>CONTROLLO RX POST-INSERIMENTO:</b>  {cb(rx_post)} SI   {cb(not rx_post)} NO", normal_style))
+    
+    ecg_post = get_val('controllo_ecg')
+    story.append(Paragraph(f"<b>CONTROLLO ECG POST-INSERIMENTO:</b>  {cb(ecg_post)} SI   {cb(not ecg_post)} NO", normal_style))
+    
+    story.append(Spacer(1, 4))
+    
+    # MODALITÀ
+    mod = get_val('modalita')
+    story.append(Paragraph(f"<b>MODALITÀ:</b>  {cb(mod == 'emergenza')} EMERGENZA - URGENZA    {cb(mod == 'elezione')} ELEZIONE", normal_style))
+    
+    story.append(Spacer(1, 4))
+    
+    # MOTIVAZIONE
+    motiv = get_val('motivazione')
     story.append(Paragraph("<b>MOTIVAZIONE DI INSERIMENTO CVC:</b>", normal_style))
-    motiv_options = [
-        ("chemioterapia", "chemioterapia"),
-        ("difficolta_vene", "difficoltà nel reperire vene"),
-        ("terapia_prolungata", "terapia prolungata"),
-        ("monitoraggio", "monitoraggio invasivo"),
+    motiv_opts = [("chemioterapia", "chemioterapia"), ("difficolta_vene", "difficoltà nel reperire vene"),
+                  ("terapia_prolungata", "terapia prolungata"), ("monitoraggio", "monitoraggio invasivo")]
+    motiv_line = "    " + "  ".join([f"{cb(motiv == m[0])} {m[1]}" for m in motiv_opts])
+    story.append(Paragraph(motiv_line, small_style))
+    story.append(Paragraph(f"    {cb(motiv == 'altro')} altro: {get_val('motivazione_altro')}", small_style))
+    
+    story.append(Spacer(1, 10))
+    
+    # === FOOTER ===
+    footer_data = [
+        ["DATA POSIZIONAMENTO:", get_val('data_impianto')],
+        ["OPERATORE:", get_val('operatore')],
+        ["FIRMA:", ""],
     ]
-    motiv_text = "  ".join([f"{checkbox(motivazione == opt_id)} {opt_label}" for opt_id, opt_label in motiv_options])
-    story.append(Paragraph(f"  {motiv_text}", checkbox_style))
-    story.append(Paragraph(f"  {checkbox(motivazione == 'altro')} altro: {scheda.get('motivazione_altro', '_'*30)}", checkbox_style))
+    ft = Table(footer_data, colWidths=[4.5*cm, 14*cm])
+    ft.setStyle(TableStyle([
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#e2e8f0')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+    ]))
+    story.append(ft)
+    
+    # Note se presenti
+    if get_val('note'):
+        story.append(Spacer(1, 8))
+        story.append(Paragraph(f"<b>NOTE:</b> {get_val('note')}", normal_style))
+    
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
     
     story.append(Spacer(1, 15))
     
