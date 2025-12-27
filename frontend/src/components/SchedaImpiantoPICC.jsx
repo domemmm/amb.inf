@@ -623,7 +623,7 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
   // Render SIMPLIFIED VIEW (read-only)
   const renderSimplifiedView = (data) => (
     <div className="space-y-4">
-      <h1 className="text-lg font-bold text-emerald-700">Scheda Impianto PICC - Semplificata</h1>
+      <h1 className="text-lg font-bold text-emerald-700">Scheda Impianto PICC</h1>
       
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -656,7 +656,7 @@ export const SchedaImpiantoPICC = ({ patientId, ambulatorio, schede, onRefresh }
         <div>
           <Label className="text-muted-foreground">Tunnelizzazione</Label>
           <p className={data.tunnelizzazione ? "text-green-600 font-medium" : ""}>
-            {data.tunnelizzazione ? "Sì" : "No"}
+            {data.tunnelizzazione ? `Sì${data.tunnelizzazione_note ? ` (${data.tunnelizzazione_note})` : ''}` : "No"}
           </p>
         </div>
         <div>
