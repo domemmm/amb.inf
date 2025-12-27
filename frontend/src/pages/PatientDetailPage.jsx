@@ -481,9 +481,9 @@ export default function PatientDetailPage() {
               </TabsTrigger>
             </>
           )}
-          <TabsTrigger value="foto" className="gap-2">
-            <Camera className="w-4 h-4" />
-            Foto
+          <TabsTrigger value="allegati" className="gap-2">
+            <Paperclip className="w-4 h-4" />
+            Allegati
           </TabsTrigger>
         </TabsList>
 
